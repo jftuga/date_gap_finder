@@ -37,6 +37,7 @@ type rootOptions struct {
 	HasHeader bool
 	Amount int
 	Period string
+	Debug int
 }
 
 var allRootOptions rootOptions
@@ -74,6 +75,7 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&allRootOptions.HasHeader, "header", "H", true, "if CSV file has header line")
 	rootCmd.PersistentFlags().IntVarP(&allRootOptions.Amount, "amount", "a", -1, "a maximum, numeric duration")
 	rootCmd.PersistentFlags().StringVarP(&allRootOptions.Period, "period", "p", "", "period of time, such as: days, hours, minutes")
+	rootCmd.PersistentFlags().IntVarP(&allRootOptions.Debug, "debug", "D", 0, "enable verbose debugging at this level")
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.

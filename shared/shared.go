@@ -20,34 +20,52 @@ func stringInSlice(a string, list []string) bool {
 	return false
 }
 
-func DatesHaveGaps(previous, current *goment.Goment, amount int, period string) (bool,bool) {
-	debug := true
+func DatesHaveGaps(previous, current *goment.Goment, amount int, period string, debug int) (bool,bool, *goment.Goment) {
 	if previous.ToTime().IsZero() {
-		return false, false
+		return false, false, nil
 	}
 
 	outputFmt := "L LTS dddd"
 	previous = previous.Add(5, "seconds")
 	current = current.Subtract(5, "seconds")
 
-	if debug {
+	if debug > 998 {
 		fmt.Println("     previous :", previous.Format(outputFmt))
 		fmt.Println("      current :", current.Format(outputFmt))
 	}
-	checked := previous.Add(amount, period)
+	checked, err := goment.New(previous)
+	if err != nil {
+		log.Fatalf("Unable to instantiate new goment object from 'previous'\n%s\n", err)
+	}
+	checked.Add(amount, period)
+	//checked := previous.Add(amount, period)
 	hasGap := !checked.IsSameOrAfter(current)
-	if debug {
+	if debug > 998 {
 		fmt.Printf("IsSameOrAfter : %s : %v\n", checked.Format(outputFmt), hasGap)
 	}
 	gapOnWeekday := stringInSlice(checked.Format("dddd"), workWeek)
-	if hasGap && debug {
-		fmt.Printf(" gapOnWeekday : %v - %s\n", gapOnWeekday, checked.Format("dddd"))
+	if !gapOnWeekday {
+		fmt.Println("previous      :", previous.Format("dddd"))
+		fmt.Println("current       :", current.Format("dddd"))
+
+		if previous.Format("dddd") == "Friday" && current.Format("dddd") == "Tuesday" {
+			if debug > 998 {
+				fmt.Println("missed Monday : true")
+				previous.Add(72, "hours")
+			}
+			gapOnWeekday = true
+		}
 	}
-	if debug {
+	if hasGap && debug > 998 {
+		fmt.Printf(" gapOnWeekday : %v - %s\n", gapOnWeekday, checked.Format("dddd"))
+		diff := current.ToTime().Sub(previous.ToTime())
+		fmt.Printf("diff in hours : %s\n", diff)
+	}
+	if debug > 998 {
 		fmt.Println("------------------------------------------------------")
 		fmt.Println()
 	}
-	return hasGap, gapOnWeekday
+	return hasGap, gapOnWeekday, previous
 }
 
 func GetKeyVal(combined string) (int,string) {

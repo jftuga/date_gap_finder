@@ -89,7 +89,7 @@ func searchAllFiles(args []string) {
 }
 
 func searchOneFile(fname string) ([]*goment.Goment, string) {
-	debug := false
+	debug := allRootOptions.Debug
 	outputFmt := "L LTS dddd"
 	input := fileOps.CsvOpenRead(fname)
 	i := 0
@@ -124,10 +124,10 @@ func searchOneFile(fname string) ([]*goment.Goment, string) {
 				log.Fatalf("Can not parse date time for: '%s'\n%s\n", currentTimeStamp, err)
 			}
 		}
-		hasGap, gapOnWeekday := shared.DatesHaveGaps(previous, current, allRootOptions.Amount, allRootOptions.Period)
+		hasGap, gapOnWeekday, notFound := shared.DatesHaveGaps(previous, current, allRootOptions.Amount, allRootOptions.Period, allRootOptions.Debug)
 		if hasGap && gapOnWeekday {
-			if debug {
-				fmt.Printf("missing date: '%s'\n", previous.Format(outputFmt))
+			if debug > 98 {
+				fmt.Printf(" missing date : %s until %s   [%s]\n", previous.Format(outputFmt), current.Format(outputFmt), notFound.Format(outputFmt))
 			}
 			missingDates = append(missingDates, previous)
 		}
