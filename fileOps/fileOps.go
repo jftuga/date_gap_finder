@@ -31,3 +31,9 @@ func CsvOpenWriteBuf() *csv.Writer {
 	var buf bytes.Buffer
 	return csv.NewWriter(&buf)
 }
+
+func SaveToCsv(fname string, data [][]string) {
+	fname = "new--" + fname
+	w := csv.NewWriter(os.Stdout)
+	w.WriteAll(data)
+}

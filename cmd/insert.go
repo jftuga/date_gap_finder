@@ -24,6 +24,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/jftuga/date_gap_finder/fileOps"
+	"github.com/jftuga/date_gap_finder/shared"
 	"github.com/nleeper/goment"
 	"github.com/spf13/cobra"
 	"log"
@@ -63,15 +64,22 @@ func init() {
 
 func insertAllFiles(args []string) {
 	for _, fname := range args {
-		insertOneFile(fname)
+		augmentedData := insertOneFile(fname)
+		if augmentedData == nil {
+			return
+		}
+		fileOps.SaveToCsv(fname, augmentedData)
 	}
 }
 
-func insertOneFile(fname string) {
+func insertOneFile(fname string) [][]string {
+	debug := false
 	allMissingDates, layout := searchOneFile(fname)
-	fmt.Println("layout:", layout)
+	if debug {
+		fmt.Println("layout:", layout)
+	}
 	if len(allMissingDates) == 0 {
-		return
+		return nil
 	}
 
 	input := fileOps.CsvOpenRead(fname)
@@ -92,41 +100,69 @@ func insertOneFile(fname string) {
 		}
 		i += 1
 
-		fmt.Println(i, current)
-		if i == 5 {
-			fmt.Println("debug:", current)
-		}
-
 		currentDateTime, err := goment.New(current[allRootOptions.Column])
 		if err != nil {
 			log.Fatalf("Can initialize goment struct for: '%s'\n%s",current, err)
 		}
 		if currentDateTime.IsSameOrBefore(allMissingDates[m]) {
-			fmt.Printf("IsSameOrBefore: %s - %s\n", current, currentDateTime.Format((outputFmt)))
+			if debug {
+				fmt.Printf("IsSameOrBefore: %s - %s\n", current, currentDateTime.Format(outputFmt))
+			}
 			augmentedData = append(augmentedData, current)
 			continue
 		}
-		//fmt.Println("Newer: ", currentDateTime.Format(outputFmt))
-		fmt.Println("Newer: ", allMissingDates[m].Format(outputFmt))
+
+		if debug {
+			fmt.Println("Newer: ", allMissingDates[m].Format(outputFmt))
+		}
 		missedDate := allMissingDates[m].ToTime().Format(layout)
-		missingRecord := []string {missedDate}
-		augmentedData = append(augmentedData, missingRecord)
+		missingRecord := make(map [int]string)
+		missingRecord[allRootOptions.Column] = missedDate
+		for _, column := range allInsertOptions.columnInserts {
+			if debug {
+				fmt.Println("kv:",column)
+			}
+			col, val := shared.GetKeyVal(column)
+			missingRecord[col] = val
+		}
+		if debug {
+			fmt.Println("missingRecord:", missingRecord)
+		}
+		keys, last := shared.SortIntMapByKey(missingRecord)
+		if debug {
+			fmt.Println("keys, last:", keys, last)
+		}
+		var newRow []string
+		for i=0; i <= last; i++{
+			if val, ok := missingRecord[i]; ok {
+				newRow = append(newRow, val)
+				if debug {
+					fmt.Println("appending:", val)
+				}
+			} else {
+				newRow = append(newRow, "")
+			}
+		}
+		newRow[allRootOptions.Column] = missedDate
+		augmentedData = append(augmentedData, newRow)
 		augmentedData = append(augmentedData, current)
 		m += 1
 
-		fmt.Println("-----------------------------------------------")
+		if debug {
+			fmt.Println("-----------------------------------------------")
+		}
 	}
-
-	fmt.Println()
-	fmt.Println("=========================================================")
-	fmt.Println()
 
 	output := fileOps.CsvOpenWriteBuf()
 	err = output.WriteAll(augmentedData)
 	if err != nil {
 		log.Fatalf("Unable to save CSV data: %s\n",err)
 	}
-	for _, rec := range augmentedData {
-		fmt.Println(rec)
+
+	if debug {
+		for _, rec := range augmentedData {
+			fmt.Println(rec)
+		}
 	}
+	return augmentedData
 }
