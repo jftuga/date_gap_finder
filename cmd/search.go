@@ -79,8 +79,12 @@ func init() {
 }
 
 func searchAllFiles(args []string) {
+	outputFmt := "L LTS dddd"
 	for _, fname := range args {
-		searchOneFile(fname)
+		missingDates, _ := searchOneFile(fname)
+		for _,d := range missingDates {
+			fmt.Printf("missing: %s\n", d.Format(outputFmt))
+		}
 	}
 }
 
