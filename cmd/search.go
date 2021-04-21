@@ -23,6 +23,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/araddon/dateparse"
 	"github.com/jftuga/date_gap_finder/fileOps"
 	"github.com/jftuga/date_gap_finder/shared"
 	"github.com/nleeper/goment"
@@ -83,17 +84,16 @@ func searchAllFiles(args []string) {
 	}
 }
 
-func searchOneFile(fname string) {
+func searchOneFile(fname string) ([]*goment.Goment, string) {
+	debug := false
 	outputFmt := "L LTS dddd"
-	input := fileOps.CsvOpen(fname)
+	input := fileOps.CsvOpenRead(fname)
 	i := 0
 	var previous *goment.Goment
-	var err error
-	previous, err = goment.New("")
-	if err != nil {
-		log.Fatalf("Error when initalizing 'previous'\n%s\n", err)
-	}
+	var layout string
+	previous, _ = goment.New("")
 
+	var missingDates []*goment.Goment
 	for {
 		record, err := input.Read()
 		if err == io.EOF {
@@ -112,10 +112,22 @@ func searchOneFile(fname string) {
 		if err != nil {
 			log.Fatalf("error with timestamp: '%s'\n%s\n", currentTimeStamp,err)
 		}
+
+		// get the date layout from the first row of CSV data
+		if i == 2 {
+			layout, err = dateparse.ParseFormat(currentTimeStamp)
+			if err != nil {
+				log.Fatalf("Can not parse date time for: '%s'\n%s\n", currentTimeStamp, err)
+			}
+		}
 		hasGap, gapOnWeekday := shared.DatesHaveGaps(previous, current, allRootOptions.Amount, allRootOptions.Period)
 		if hasGap && gapOnWeekday {
-			fmt.Printf("Missing date: '%s'\n", previous.Format(outputFmt))
+			if debug {
+				fmt.Printf("missing date: '%s'\n", previous.Format(outputFmt))
+			}
+			missingDates = append(missingDates, previous)
 		}
 		previous = current
 	}
+	return missingDates, layout
 }
