@@ -45,14 +45,16 @@ func DatesHaveGaps(previous, current *goment.Goment, amount int, period string, 
 	}
 	gapOnWeekday := stringInSlice(checked.Format("dddd"), workWeek)
 	if !gapOnWeekday {
-		fmt.Println("previous      :", previous.Format("dddd"))
-		fmt.Println("current       :", current.Format("dddd"))
+		if debug > 998 {
+			fmt.Println("previous      :", previous.Format("dddd"))
+			fmt.Println("current       :", current.Format("dddd"))
+		}
 
 		if previous.Format("dddd") == "Friday" && current.Format("dddd") == "Tuesday" {
 			if debug > 998 {
 				fmt.Println("missed Monday : true")
-				previous.Add(72, "hours")
 			}
+			previous.Add(72, "hours")
 			gapOnWeekday = true
 		}
 	}
