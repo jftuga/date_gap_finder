@@ -22,6 +22,7 @@ THE SOFTWARE.
 package cmd
 
 import (
+	"encoding/csv"
 	"fmt"
 	"github.com/araddon/dateparse"
 	"github.com/jftuga/date_gap_finder/fileOps"
@@ -83,15 +84,19 @@ func searchAllFiles(args []string) {
 	for _, fname := range args {
 		missingDates, _ := searchOneFile(fname)
 		for _,d := range missingDates {
-			fmt.Printf("missing: %s\n", d.Format(outputFmt))
+			fmt.Printf("[159] missing: %s\n", d.Format(outputFmt))
 		}
 	}
 }
 
 func searchOneFile(fname string) ([]*goment.Goment, string) {
+	input := fileOps.CsvOpenRead(fname)
+	return searchFromReader(input, fname)
+}
+
+func searchFromReader(input *csv.Reader, streamName string) ([]*goment.Goment, string) {
 	debug := allRootOptions.Debug
 	outputFmt := "L LTS dddd"
-	input := fileOps.CsvOpenRead(fname)
 	i := 0
 	var previous *goment.Goment
 	var layout string
@@ -104,7 +109,7 @@ func searchOneFile(fname string) ([]*goment.Goment, string) {
 			break
 		}
 		if err != nil {
-			log.Fatalf("Unable to read record from file: '%s'\n%s\n", fname, err)
+			log.Fatalf("Unable to read record from stream: '%s'\n%s\n", streamName, err)
 		}
 		if allRootOptions.HasHeader && i == 0 {
 			i += 1
@@ -125,6 +130,7 @@ func searchOneFile(fname string) ([]*goment.Goment, string) {
 			}
 		}
 		hasGap, gapOnWeekday, notFound := shared.DatesHaveGaps(previous, current, allRootOptions.Amount, allRootOptions.Period, allRootOptions.Debug)
+		fmt.Println("       hasGap :", hasGap)
 		if hasGap && gapOnWeekday {
 			if debug > 98 {
 				fmt.Printf(" missing date : %s until %s   [%s]\n", previous.Format(outputFmt), current.Format(outputFmt), notFound.Format(outputFmt))

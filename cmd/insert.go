@@ -89,22 +89,20 @@ func insertOneFile(fname string) [][]string {
 	}
 
 	m := 0
-	i := 0
 	outputFmt := "L LTS dddd"
 	var augmentedData [][]string
 
-	for _, current := range allRecords {
+	for i, current := range allRecords {
 		if allRootOptions.HasHeader && i == 0 {
-			i += 1
 			continue
 		}
-		i += 1
 
 		currentDateTime, err := goment.New(current[allRootOptions.Column])
 		if err != nil {
 			log.Fatalf("Can initialize goment struct for: '%s'\n%s",current, err)
 		}
-		if currentDateTime.IsSameOrBefore(allMissingDates[m]) {
+
+		if m < len(allMissingDates) && currentDateTime.IsSameOrBefore(allMissingDates[m]) {
 			if debug {
 				fmt.Printf("IsSameOrBefore: %s - %s\n", current, currentDateTime.Format(outputFmt))
 			}
@@ -112,8 +110,14 @@ func insertOneFile(fname string) [][]string {
 			continue
 		}
 
-		if debug {
+		if debug && m < len(allMissingDates) {
 			fmt.Println("Newer: ", allMissingDates[m].Format(outputFmt))
+		}
+
+		fmt.Println("iiiiiiiiiii:", i, len(allMissingDates), m)
+		if m == len(allMissingDates) {
+			fmt.Println("DONE")
+			continue
 		}
 		missedDate := allMissingDates[m].ToTime().Format(layout)
 		missingRecord := make(map [int]string)
