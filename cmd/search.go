@@ -78,31 +78,31 @@ func init() {
 }
 
 func searchAllFiles(args []string) {
-	//outputFmt := "L LTS dddd"
+	outputFmt := "L LTS dddd"
 	for _, fname := range args {
-		//missingDates, _ := searchOneFile(fname)
-		searchOneFile(fname)
-		/*
-		for _,d := range missingDates {
-			fmt.Printf("[159] missing: %s\n", d.Format(outputFmt))
-		} */
+		missingDates := searchOneFile(fname)
+		for i,d := range missingDates {
+			fmt.Printf("[%d] missing: %s\n", i+1, d.Format(outputFmt))
+		}
 	}
 }
 
-func searchOneFile(fname string) /*([]*goment.Goment, string)*/ {
+func searchOneFile(fname string) []*goment.Goment {
 	fileOps.CsvOpenRead(fname)
 	input := fileOps.CsvOpenRead(fname)
-	searchFromReader(input, fname)
+	return searchFromReader(input, fname)
 }
 
-func searchFromReader(input *csv.Reader, streamName string)  {
-	//debug := allRootOptions.Debug
+func searchFromReader(input *csv.Reader, streamName string) []*goment.Goment {
+	debug := allRootOptions.Debug
 	outputFmt := "L LTS dddd"
 
 	allRecords, err := input.ReadAll()
-	fmt.Println("allRecords:", len(allRecords))
 	if err != nil {
 		log.Fatalf("Error #89533: Unable to read from stream: '%s'; %s\n", streamName, err)
+	}
+	if debug > 98 {
+		fmt.Println("allRecords:", len(allRecords))
 	}
 
 	var csvDates []goment.Goment
@@ -117,15 +117,15 @@ func searchFromReader(input *csv.Reader, streamName string)  {
 		csvDates = append(csvDates,*g)
 	}
 
-	fmt.Println("csvDates")
-	fmt.Println("========")
-	for _, d := range csvDates {
-		fmt.Println(d.Format(outputFmt))
+	if debug > 98 {
+		fmt.Println("csvDates")
+		fmt.Println("========")
+		for _, d := range csvDates {
+			fmt.Println(d.Format(outputFmt))
+		}
 	}
 
-
 	f := 0
-
 	if allRootOptions.HasHeader {
 		f = 1
 	}
@@ -140,7 +140,6 @@ func searchFromReader(input *csv.Reader, streamName string)  {
 		log.Fatalf("Error #30435: Invalid data/time: '%s'; %s\n", lastRec[allRootOptions.Column], err)
 	}
 
-
 	var requiredDates []goment.Goment
 	durationInSeconds := shared.GetDuration(allRootOptions.Amount, allRootOptions.Period)
 	current, _ := goment.New(first)
@@ -152,29 +151,41 @@ func searchFromReader(input *csv.Reader, streamName string)  {
 		current.Add(durationInSeconds, "seconds")
 	}
 
-	fmt.Println()
-	fmt.Println("requiredDates")
-	fmt.Println("=============")
-	for _, d := range requiredDates {
-		fmt.Println(d.Format(outputFmt))
+	if debug > 98  {
+		fmt.Println()
+		fmt.Println("requiredDates")
+		fmt.Println("=============")
+		for _, d := range requiredDates {
+			fmt.Println(d.Format(outputFmt))
+		}
 	}
 
-	fmt.Println()
-	fmt.Println("comparison")
-	fmt.Println("==========")
-	for _, reqDate := range requiredDates {
+	if debug > 98  {
+		fmt.Println()
+		fmt.Println("comparison")
+		fmt.Println("==========")
+	}
+	var allMissingDates []*goment.Goment
+	for h, reqDate := range requiredDates {
 		for i, csvDate := range csvDates {
 			result := csvDate.IsSameOrBefore(&reqDate)
-			fmt.Println("csv:", csvDate.Format(outputFmt), "[sameOrBefore]", "req:", reqDate.Format(outputFmt), "=>", result)
+			if debug > 98  {
+				fmt.Println("csv:", csvDate.Format(outputFmt), "[sameOrBefore]", "req:", reqDate.Format(outputFmt), "=>", result)
+			}
 			if result {
 				csvDates = shared.RemoveIndex(csvDates,i)
 				break
 			} else {
-				fmt.Println("missing date:", reqDate.Format(outputFmt))
+				if debug > 98  {
+					fmt.Println("missing date:", reqDate.Format(outputFmt))
+				}
+				allMissingDates = append(allMissingDates, &requiredDates[h])
 				break
 			}
 		}
-		fmt.Println("---------------")
+		if debug > 98  {
+			fmt.Println("---------------")
+		}
 	}
-
+	return allMissingDates
 }
