@@ -10,8 +10,10 @@ import (
 	"time"
 )
 
+// used to skip weekends, do not change this
 var workWeek = []string{"Monday", "Tuesday", "Wednesday", "Thursday", "Friday"}
 
+// stringInSlice - determine is a string is contained within a slice
 func stringInSlice(a string, list []string) bool {
 	for _, b := range list {
 		if b == a {
@@ -21,6 +23,13 @@ func stringInSlice(a string, list []string) bool {
 	return false
 }
 
+// DatesHaveGap - determine if the is a gap between two dates
+// the length of the gap is defined by 'amount' and 'period'
+// examples: a:25 p:hours; a:1 p:days; a:5 p:minutes
+// there is a 10 second 'grace period' built into this function in case date values are off by just a few seconds
+// you can also skip weekends, thus, a 'previous' date of Friday and a 'current' date of Monday would not have a gap
+// returns: a bool for having a date gap or not
+// if gap, then also return the last allowable date; otherwise the 'epoch time' of "12/31/1969 7:00:00 PM Wednesday"
 func DatesHaveGap(previous, current *goment.Goment, amount int, period string, skipWeekends bool, debug int) (bool,*goment.Goment) {
 	if previous.ToTime().IsZero() {
 		epochTime, _ := goment.New()
@@ -32,11 +41,14 @@ func DatesHaveGap(previous, current *goment.Goment, amount int, period string, s
 	current = current.Subtract(5, "seconds")
 	gapOnWeekday := stringInSlice(current.Format("dddd"), workWeek)
 	if debug > 998 {
+		fmt.Println("vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv")
 		fmt.Println("     previous :", previous.Format(outputFmt))
 		fmt.Println("      current :", current.Format(outputFmt))
+		fmt.Println(" skipWeekends :", skipWeekends)
 		fmt.Println(" gapOnWeekday :", gapOnWeekday)
 	}
 
+	// any date after this would be consider a gap
 	lastAllowable, err := goment.New(previous)
 	if err != nil {
 		log.Fatalf("Unable to clone 'lastAllowable' goment object from 'previous'\n%s\n", err)
@@ -50,14 +62,20 @@ func DatesHaveGap(previous, current *goment.Goment, amount int, period string, s
 	if skipWeekends && lastAllowable.Format("dddd") == "Sunday" {
 		lastAllowable.Add(24, "hours")
 	}
+
+	// compare the last date allowed before a gap occurs against the current date
 	hasGap := current.IsSameOrAfter(lastAllowable)
 	if debug > 998 {
 		fmt.Println(" lastAllowable:", lastAllowable.Format(outputFmt))
 		fmt.Println("       hasGap :", hasGap)
 	}
 
+	// FIXME: remove after development and testing is initially completed
 	if hasGap && !gapOnWeekday && skipWeekends {
-		fmt.Println("hasGap, but occurs on weekend and we want to skip weekends")
+		if debug > 998 {
+			fmt.Println("hasGap, but occurs on weekend and we want to skip weekends")
+		}
+		log.Fatalf("Should not reach this code. Curious as to what circumstances this occurs")
 		epochTime, _ := goment.New()
 		return false, epochTime
 	}
@@ -70,57 +88,8 @@ func DatesHaveGap(previous, current *goment.Goment, amount int, period string, s
 	return hasGap, lastAllowable
 }
 
-
-func DatesHaveGaps2(previous, current *goment.Goment, amount int, period string, debug int) (bool,bool, *goment.Goment) {
-	if previous.ToTime().IsZero() {
-		return false, false, nil
-	}
-
-	outputFmt := "L LTS dddd"
-	previous = previous.Add(5, "seconds")
-	current = current.Subtract(5, "seconds")
-
-	if debug > 998 {
-		fmt.Println("     previous :", previous.Format(outputFmt))
-		fmt.Println("      current :", current.Format(outputFmt))
-	}
-	checked, err := goment.New(previous)
-	if err != nil {
-		log.Fatalf("Unable to instantiate new goment object from 'previous'\n%s\n", err)
-	}
-	checked.Add(amount, period)
-	//checked := previous.Add(amount, period)
-	hasGap := !checked.IsSameOrAfter(current)
-	if debug > 998 {
-		fmt.Printf("IsSameOrAfter : %s : %v\n", checked.Format(outputFmt), hasGap)
-	}
-	gapOnWeekday := stringInSlice(checked.Format("dddd"), workWeek)
-	if !gapOnWeekday {
-		if debug > 998 {
-			fmt.Println("previous      :", previous.Format("dddd"))
-			fmt.Println("current       :", current.Format("dddd"))
-		}
-
-		if previous.Format("dddd") == "Friday" && current.Format("dddd") == "Tuesday" {
-			if debug > 998 {
-				fmt.Println("missed Monday : true")
-			}
-			previous.Add(72, "hours")
-			gapOnWeekday = true
-		}
-	}
-	if hasGap && debug > 998 {
-		fmt.Printf(" gapOnWeekday : %v - %s\n", gapOnWeekday, checked.Format("dddd"))
-		diff := current.ToTime().Sub(previous.ToTime())
-		fmt.Printf("diff in hours : %s\n", diff)
-	}
-	if debug > 998 {
-		fmt.Println("------------------------------------------------------ ",hasGap, gapOnWeekday, checked.Format(outputFmt))
-		fmt.Println()
-	}
-	return hasGap, gapOnWeekday, checked
-}
-
+// GetKeyVal - split a string of "N,S" into a number and a string
+// 1,-1 => 1 (int); "-1" (string)
 func GetKeyVal(combined string) (int,string) {
 	slots := strings.Split(combined,",")
 	if len(slots) != 2 {
