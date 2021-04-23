@@ -129,15 +129,20 @@ func searchFromReader(input *csv.Reader, streamName string) ([]*goment.Goment, s
 				log.Fatalf("Can not parse date time for: '%s'\n%s\n", currentTimeStamp, err)
 			}
 		}
-		hasGap, gapOnWeekday, notFound := shared.DatesHaveGaps(previous, current, allRootOptions.Amount, allRootOptions.Period, allRootOptions.Debug)
-		fmt.Println("       hasGap :", hasGap)
-		if hasGap && gapOnWeekday {
-			if debug > 98 {
-				fmt.Printf(" missing date : %s until %s   [%s]\n", previous.Format(outputFmt), current.Format(outputFmt), notFound.Format(outputFmt))
-			}
-			missingDates = append(missingDates, previous)
+		hasGap, notFound := shared.DatesHaveGap(previous, current, allRootOptions.Amount, allRootOptions.Period, allRootOptions.SkipWeekends, allRootOptions.Debug)
+		if debug > 98 {
+			fmt.Println("       hasGap :", hasGap)
+			fmt.Println("     notFound :", notFound.Format(outputFmt))
 		}
-		previous = current
+		if hasGap {
+			fmt.Println("missing date :", notFound.Format(outputFmt))
+			missingDates = append(missingDates, notFound)
+			if notFound.Format() != "12/31/1969 7:00:00 PM Wednesday" {
+				previous = notFound // possibly broken
+			}
+		} else {
+			previous = current //possible broken
+		}
 	}
 	return missingDates, layout
 }

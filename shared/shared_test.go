@@ -8,7 +8,7 @@ import (
 )
 
 const defaultConfigNum int = 1
-const epoch string = "12/31/1969 7:00:00 PM Wednesday"
+const epochDate string = "12/31/1969 7:00:00 PM Wednesday"
 
 func config(config int) (int, bool, int, string, string) {
 	var debug, amount int
@@ -48,7 +48,7 @@ func TestNoDateGaps1(t *testing.T) {
 	hasGap, dateSkipped := DatesHaveGap(previous, current, amount, period, skipWeekends, debug)
 	iss := is.New(t)
 	iss.True(!hasGap)
-	iss.Equal(dateSkipped.Format(outputFmt), epoch )
+	iss.Equal(dateSkipped.Format(outputFmt), epochDate )
 }
 
 // TestNoDateGaps2 - there are no date gaps, 5 minute period (test the 10-second granularity)
@@ -60,7 +60,7 @@ func TestNoDateGaps2(t *testing.T) {
 	hasGap, dateSkipped := DatesHaveGap(previous, current, amount, period, skipWeekends, debug)
 	iss := is.New(t)
 	iss.True(!hasGap)
-	iss.Equal(dateSkipped.Format(outputFmt), epoch )
+	iss.Equal(dateSkipped.Format(outputFmt), epochDate )
 }
 
 // TestGapOnFriday1 - test for a date gap occurring on a Friday, 25 hour period
@@ -108,7 +108,7 @@ func TestGapOnSaturday1(t *testing.T) {
 	hasGap, dateSkipped := DatesHaveGap(previous, current, amount, period, skipWeekends, debug)
 	iss := is.New(t)
 	iss.True(!hasGap)
-	iss.Equal(dateSkipped.Format(outputFmt), epoch)
+	iss.Equal(dateSkipped.Format(outputFmt), epochDate)
 }
 
 // TestGapOnSaturday2 - test for a date gap occurring on a Saturday, skipWeekends=false (therefore, gap occurs)
@@ -132,7 +132,7 @@ func TestGapOnSunday1(t *testing.T) {
 	hasGap, dateSkipped := DatesHaveGap(previous, current, amount, period, skipWeekends, debug)
 	iss := is.New(t)
 	iss.True(!hasGap)
-	iss.Equal(dateSkipped.Format(outputFmt), epoch)
+	iss.Equal(dateSkipped.Format(outputFmt), epochDate)
 }
 
 // TestGapOnSunday2 - test for a date gap occurring on a Sunday, skipWeekends=false (therefore, gap occurs)
