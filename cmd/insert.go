@@ -22,12 +22,8 @@ THE SOFTWARE.
 package cmd
 
 import (
-	"fmt"
 	"github.com/jftuga/date_gap_finder/fileOps"
-	"github.com/jftuga/date_gap_finder/shared"
-	"github.com/nleeper/goment"
 	"github.com/spf13/cobra"
-	"log"
 )
 
 type insertOptions struct {
@@ -73,6 +69,12 @@ func insertAllFiles(args []string) {
 }
 
 func insertOneFile(fname string) [][]string {
+	var dummy [][]string
+	return dummy
+}
+
+/*
+func insertOneFile2(fname string) [][]string {
 	debug := false
 	allMissingDates, layout := searchOneFile(fname)
 	if debug {
@@ -170,3 +172,4 @@ func insertOneFile(fname string) [][]string {
 	}
 	return augmentedData
 }
+*/

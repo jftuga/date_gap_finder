@@ -24,12 +24,10 @@ package cmd
 import (
 	"encoding/csv"
 	"fmt"
-	"github.com/araddon/dateparse"
 	"github.com/jftuga/date_gap_finder/fileOps"
 	"github.com/jftuga/date_gap_finder/shared"
 	"github.com/nleeper/goment"
 	"github.com/spf13/cobra"
-	"io"
 	"log"
 )
 
@@ -80,69 +78,103 @@ func init() {
 }
 
 func searchAllFiles(args []string) {
-	outputFmt := "L LTS dddd"
+	//outputFmt := "L LTS dddd"
 	for _, fname := range args {
-		missingDates, _ := searchOneFile(fname)
+		//missingDates, _ := searchOneFile(fname)
+		searchOneFile(fname)
+		/*
 		for _,d := range missingDates {
 			fmt.Printf("[159] missing: %s\n", d.Format(outputFmt))
-		}
+		} */
 	}
 }
 
-func searchOneFile(fname string) ([]*goment.Goment, string) {
+func searchOneFile(fname string) /*([]*goment.Goment, string)*/ {
+	fileOps.CsvOpenRead(fname)
 	input := fileOps.CsvOpenRead(fname)
-	return searchFromReader(input, fname)
+	searchFromReader(input, fname)
 }
 
-func searchFromReader(input *csv.Reader, streamName string) ([]*goment.Goment, string) {
-	debug := allRootOptions.Debug
+func searchFromReader(input *csv.Reader, streamName string)  {
+	//debug := allRootOptions.Debug
 	outputFmt := "L LTS dddd"
-	i := 0
-	var previous *goment.Goment
-	var layout string
-	previous, _ = goment.New("")
 
-	var missingDates []*goment.Goment
-	for {
-		record, err := input.Read()
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			log.Fatalf("Unable to read record from stream: '%s'\n%s\n", streamName, err)
-		}
+	allRecords, err := input.ReadAll()
+	fmt.Println("allRecords:", len(allRecords))
+	if err != nil {
+		log.Fatalf("Error #89533: Unable to read from stream: '%s'; %s\n", streamName, err)
+	}
+
+	var csvDates []goment.Goment
+	for i, d := range allRecords {
 		if allRootOptions.HasHeader && i == 0 {
-			i += 1
 			continue
 		}
-		i += 1
-		currentTimeStamp := record[allRootOptions.Column]
-		current, err := goment.New(currentTimeStamp)
+		g, err := goment.New(d[allRootOptions.Column])
 		if err != nil {
-			log.Fatalf("error with timestamp: '%s'\n%s\n", currentTimeStamp,err)
+			log.Fatalf("Error #30425: Invalid data/time: '%s'; %s\n", d[allRootOptions.Column], err)
 		}
-
-		// get the date layout from the first row of CSV data
-		if i == 2 {
-			layout, err = dateparse.ParseFormat(currentTimeStamp)
-			if err != nil {
-				log.Fatalf("Can not parse date time for: '%s'\n%s\n", currentTimeStamp, err)
-			}
-		}
-		hasGap, notFound := shared.DatesHaveGap(previous, current, allRootOptions.Amount, allRootOptions.Period, allRootOptions.SkipWeekends, allRootOptions.Debug)
-		if debug > 98 {
-			fmt.Println("       hasGap :", hasGap)
-			fmt.Println("     notFound :", notFound.Format(outputFmt))
-		}
-		if hasGap {
-			fmt.Println("missing date :", notFound.Format(outputFmt))
-			missingDates = append(missingDates, notFound)
-			if notFound.Format() != "12/31/1969 7:00:00 PM Wednesday" {
-				previous = notFound // possibly broken
-			}
-		} else {
-			previous = current //possible broken
-		}
+		csvDates = append(csvDates,*g)
 	}
-	return missingDates, layout
+
+	fmt.Println("csvDates")
+	fmt.Println("========")
+	for _, d := range csvDates {
+		fmt.Println(d.Format(outputFmt))
+	}
+
+
+	f := 0
+
+	if allRootOptions.HasHeader {
+		f = 1
+	}
+	firstRec := allRecords[f]
+	first, err := goment.New(firstRec[allRootOptions.Column])
+	if err != nil {
+		log.Fatalf("Error #30430: Invalid data/time: '%s'; %s\n", firstRec[allRootOptions.Column], err)
+	}
+	lastRec := allRecords[len(allRecords)-1]
+	last, err := goment.New(lastRec[allRootOptions.Column])
+	if err != nil {
+		log.Fatalf("Error #30435: Invalid data/time: '%s'; %s\n", lastRec[allRootOptions.Column], err)
+	}
+
+
+	var requiredDates []goment.Goment
+	durationInSeconds := shared.GetDuration(allRootOptions.Amount, allRootOptions.Period)
+	current, _ := goment.New(first)
+	for {
+		if current.IsAfter(last) {
+			break
+		}
+		requiredDates = append(requiredDates, *current)
+		current.Add(durationInSeconds, "seconds")
+	}
+
+	fmt.Println()
+	fmt.Println("requiredDates")
+	fmt.Println("=============")
+	for _, d := range requiredDates {
+		fmt.Println(d.Format(outputFmt))
+	}
+
+	fmt.Println()
+	fmt.Println("comparison")
+	fmt.Println("==========")
+	for _, reqDate := range requiredDates {
+		for i, csvDate := range csvDates {
+			result := csvDate.IsSameOrBefore(&reqDate)
+			fmt.Println("csv:", csvDate.Format(outputFmt), "[sameOrBefore]", "req:", reqDate.Format(outputFmt), "=>", result)
+			if result {
+				csvDates = shared.RemoveIndex(csvDates,i)
+				break
+			} else {
+				fmt.Println("missing date:", reqDate.Format(outputFmt))
+				break
+			}
+		}
+		fmt.Println("---------------")
+	}
+
 }

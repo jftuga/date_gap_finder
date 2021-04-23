@@ -118,3 +118,36 @@ func SortIntMapByKey(m map[int]string) ([]int,int) {
 	sort.Ints(keys)
 	return keys, largest
 }
+
+// GetDuration - convert from allRootOptions.Amount, allRootOptions.Period
+// to a time.Duration
+func GetDuration(a int, period string) int {
+	duration := ""
+	if period == "hours" {
+		duration = "h"
+	} else if period == "minutes" {
+		duration = "m"
+	} else if period == "seconds" {
+		duration = "s"
+	} else if period == "days" {
+		duration="h"
+		a += 24
+	} else {
+		log.Fatalf("Error #80620: unable to convert to time.Duration: '%d, %s'\n", a, period)
+	}
+
+	parsed, err := time.ParseDuration(fmt.Sprintf("%d%s", a, duration))
+	if err != nil {
+		log.Fatalf("Error #80625: unable to convert to time.Duration: '%d, %s'; %s\n", a, period, err)
+	}
+	return int(parsed.Seconds())
+}
+
+// removeIndex - remove an item from a slice
+// https://stackoverflow.com/a/67060285/452281
+func RemoveIndex(items []goment.Goment, idx int) []goment.Goment{
+	ret := make([]goment.Goment, len(items)-1)
+	copy(ret[:idx], items[:idx])
+	copy(ret[idx:], items[idx+1:])
+	return ret
+}
