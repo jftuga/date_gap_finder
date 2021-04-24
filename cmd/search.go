@@ -129,6 +129,9 @@ func searchFromReader(input *csv.Reader, streamName string) []*goment.Goment {
 	if allRootOptions.HasHeader {
 		f = 1
 	}
+	if f >= len(allRecords) {
+		log.Fatalf("Error #98450: CSV file only contains '%d' records: '%s'\n", len(allRecords), streamName)
+	}
 	firstRec := allRecords[f]
 	first, err := goment.New(firstRec[allRootOptions.Column])
 	if err != nil {
@@ -173,6 +176,7 @@ func searchFromReader(input *csv.Reader, streamName string) []*goment.Goment {
 				fmt.Println("csv:", csvDate.Format(outputFmt), "[sameOrBefore]", "req:", reqDate.Format(outputFmt), "=>", result)
 			}
 			if result {
+				fmt.Println("Removing from CSV:", csvDates[i].Format(outputFmt))
 				csvDates = shared.RemoveIndex(csvDates,i)
 				break
 			} else {
