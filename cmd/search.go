@@ -97,7 +97,7 @@ func findMissingDates(csvDates, requiredDates []goment.Goment) []string {
 	outputFmt := "L LTS dddd"
 
 	maxTimeDiff := shared.GetDuration(allRootOptions.Amount, allRootOptions.Period)
-	seenCsvDates := make(map [string]bool)
+	seenDates := make(map [string]bool)
 	for _, reqDate := range requiredDates {
 		for _, csvDate := range csvDates {
 			if isSameOrBefore(csvDate, reqDate) {
@@ -105,7 +105,7 @@ func findMissingDates(csvDates, requiredDates []goment.Goment) []string {
 				// compare the time duration difference
 				diff := shared.GetTimeDifference(csvDate,reqDate)
 				if diff.Seconds() < maxTimeDiff.Seconds() {
-					seenCsvDates[key] = true
+					seenDates[key] = true
 				}
 
 			}
@@ -114,9 +114,9 @@ func findMissingDates(csvDates, requiredDates []goment.Goment) []string {
 
 	if debug > 98 {
 		fmt.Println()
-		fmt.Println("seenCsvDates")
+		fmt.Println("seenDates")
 		fmt.Println("============")
-		for key := range seenCsvDates {
+		for key := range seenDates {
 			fmt.Println(key)
 		}
 	}
@@ -129,7 +129,7 @@ func findMissingDates(csvDates, requiredDates []goment.Goment) []string {
 	var allMissingDates []string
 	for _, reqDate := range requiredDates {
 		toCheck := reqDate.Format(outputFmt)
-		_, ok := seenCsvDates[toCheck]
+		_, ok := seenDates[toCheck]
 		if !ok {
 			allMissingDates = append(allMissingDates, toCheck)
 			if debug > 98 {
