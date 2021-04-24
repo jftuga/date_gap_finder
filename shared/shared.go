@@ -119,8 +119,7 @@ func SortIntMapByKey(m map[int]string) ([]int,int) {
 	return keys, largest
 }
 
-// GetDurationInSeconds - convert from allRootOptions.Amount, allRootOptions.Period
-// to seconds
+// GetDurationInSeconds - convert from allRootOptions.Amount, allRootOptions.Period to seconds
 func GetDurationInSeconds(a int, period string) int {
 	duration := ""
 	if period == "hours" {
@@ -145,7 +144,6 @@ func GetDurationInSeconds(a int, period string) int {
 
 // GetDuration - convert from allRootOptions.Amount, allRootOptions.Period
 // to a time.Duration
-
 func GetDuration(a int, period string) time.Duration {
 	duration := ""
 	if period == "hours" {
@@ -168,7 +166,7 @@ func GetDuration(a int, period string) time.Duration {
 	return parsed
 }
 
-
+// GetTimeDifference - return the difference between to Goment objects
 func GetTimeDifference(a, b goment.Goment) time.Duration {
 	aTime := a.ToTime()
 	bTime := b.ToTime()

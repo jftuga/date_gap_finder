@@ -34,17 +34,15 @@ import (
 // searchCmd represents the search command
 var searchCmd = &cobra.Command{
 	Use:   "search",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "search CSV files for missing dates",
+	Long: `CSV dates are assumed to be oldest to newest within the file.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		searchAllFiles(args)
 	},
 }
+
+var dateOutputFmt string = "L LTS dddd"
+var debugLevel int = allRootOptions.Debug
 
 func init() {
 	rootCmd.AddCommand(searchCmd)
@@ -60,27 +58,24 @@ func searchAllFiles(args []string) {
 }
 
 func searchOneFile(fname string) []string {
-	debug := allRootOptions.Debug
-	outputFmt := "L LTS dddd"
-
 	fileOps.CsvOpenRead(fname)
 	input := fileOps.CsvOpenRead(fname)
 	csvDates, requiredDates := getCsvAndRequiredDates(input, fname)
 
-	if debug > 98 {
+	if debugLevel > 98 {
 		fmt.Println("csvDates")
 		fmt.Println("========")
 		for _, d := range csvDates {
-			fmt.Println(d.Format(outputFmt))
+			fmt.Println(d.Format(dateOutputFmt))
 		}
 	}
 
-	if debug > 98  {
+	if debugLevel > 98  {
 		fmt.Println()
 		fmt.Println("requiredDates")
 		fmt.Println("=============")
 		for _, d := range requiredDates {
-			fmt.Println(d.Format(outputFmt))
+			fmt.Println(d.Format(dateOutputFmt))
 		}
 	}
 
@@ -93,15 +88,12 @@ func isSameOrBefore(csvDate, reqDate goment.Goment) bool {
 }
 
 func findMissingDates(csvDates, requiredDates []goment.Goment) []string {
-	debug := allRootOptions.Debug
-	outputFmt := "L LTS dddd"
-
 	maxTimeDiff := shared.GetDuration(allRootOptions.Amount, allRootOptions.Period)
 	seenDates := make(map [string]bool)
 	for _, reqDate := range requiredDates {
 		for _, csvDate := range csvDates {
 			if isSameOrBefore(csvDate, reqDate) {
-				key := reqDate.Format(outputFmt)
+				key := reqDate.Format(dateOutputFmt)
 				// compare the time duration difference
 				diff := shared.GetTimeDifference(csvDate,reqDate)
 				if diff.Seconds() < maxTimeDiff.Seconds() {
@@ -112,7 +104,7 @@ func findMissingDates(csvDates, requiredDates []goment.Goment) []string {
 		}
 	}
 
-	if debug > 98 {
+	if debugLevel > 98 {
 		fmt.Println()
 		fmt.Println("seenDates")
 		fmt.Println("============")
@@ -121,18 +113,18 @@ func findMissingDates(csvDates, requiredDates []goment.Goment) []string {
 		}
 	}
 
-	if debug > 98 {
+	if debugLevel > 98 {
 		fmt.Println()
 		fmt.Println("MissingDates")
 		fmt.Println("============")
 	}
 	var allMissingDates []string
 	for _, reqDate := range requiredDates {
-		toCheck := reqDate.Format(outputFmt)
+		toCheck := reqDate.Format(dateOutputFmt)
 		_, ok := seenDates[toCheck]
 		if !ok {
 			allMissingDates = append(allMissingDates, toCheck)
-			if debug > 98 {
+			if debugLevel > 98 {
 				fmt.Printf("missing date: %s\n", toCheck)
 			}
 		}
@@ -141,13 +133,11 @@ func findMissingDates(csvDates, requiredDates []goment.Goment) []string {
 }
 
 func getCsvAndRequiredDates(input *csv.Reader, streamName string) ([]goment.Goment, []goment.Goment) {
-	debug := allRootOptions.Debug
-
 	allRecords, err := input.ReadAll()
 	if err != nil {
 		log.Fatalf("Error #89533: Unable to read from stream: '%s'; %s\n", streamName, err)
 	}
-	if debug > 98 {
+	if debugLevel > 98 {
 		fmt.Println("allRecords:", len(allRecords))
 	}
 

@@ -35,13 +35,10 @@ var allInsertOptions insertOptions
 // insertCmd represents the insert command
 var insertCmd = &cobra.Command{
 	Use:   "insert",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "insert missing CSV entries",
+	Long: `CSV dates are assumed to be oldest to newest within the file.
+Multiple -r options can be used.  Each -r option is comma-delimited with
+the column number first and the value to insert (into that column) second.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		insertAllFiles(args)
 		/*
