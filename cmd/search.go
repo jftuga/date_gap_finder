@@ -49,12 +49,12 @@ func searchAllFiles(args []string) {
 	for _, fname := range args {
 		missingDates := searchOneFile(fname)
 		for i,d := range missingDates {
-			fmt.Printf("[%d] missing: %s\n", i+1, d)
+			fmt.Printf("[%d] missing: %s\n", i+1, d.Format(dateOutputFmt))
 		}
 	}
 }
 
-func searchOneFile(fname string) []string {
+func searchOneFile(fname string) []goment.Goment {
 	fileOps.CsvOpenRead(fname)
 	input := fileOps.CsvOpenRead(fname)
 	csvDates, requiredDates := getCsvAndRequiredDates(input, fname)
@@ -83,7 +83,7 @@ func isSameOrBefore(csvDate, reqDate goment.Goment) bool {
 	return csvDate.IsSameOrBefore(&reqDate)
 }
 
-func findMissingDates(csvDates, requiredDates []goment.Goment) []string {
+func findMissingDates(csvDates, requiredDates []goment.Goment) []goment.Goment {
 	maxTimeDiff := shared.GetDuration(allRootOptions.Amount, allRootOptions.Period)
 	seenDates := make(map [string]bool)
 	for _, reqDate := range requiredDates {
@@ -114,12 +114,12 @@ func findMissingDates(csvDates, requiredDates []goment.Goment) []string {
 		fmt.Println("MissingDates")
 		fmt.Println("============")
 	}
-	var allMissingDates []string
+	var allMissingDates []goment.Goment
 	for _, reqDate := range requiredDates {
 		toCheck := reqDate.Format(dateOutputFmt)
 		_, ok := seenDates[toCheck]
 		if !ok {
-			allMissingDates = append(allMissingDates, toCheck)
+			allMissingDates = append(allMissingDates, reqDate)
 			if debugLevel > 98 {
 				fmt.Printf("missing date: %s\n", toCheck)
 			}
@@ -128,9 +128,10 @@ func findMissingDates(csvDates, requiredDates []goment.Goment) []string {
 	return allMissingDates
 }
 
-func getCsvDates(allRecords [][]string) []goment.Goment {
+func getCsvDates(allRecords [][]string) ([]goment.Goment, map[string][]string) {
 	// build csvDates
 	var csvDates []goment.Goment
+	allRows := make(map [string][]string)
 	for i, d := range allRecords {
 		if allRootOptions.HasHeader && i == 0 {
 			continue
@@ -140,8 +141,9 @@ func getCsvDates(allRecords [][]string) []goment.Goment {
 			log.Fatalf("Error #30425: Invalid data/time: '%s'; %s\n", d[allRootOptions.Column], err)
 		}
 		csvDates = append(csvDates,*g)
+		allRows[g.Format(dateOutputFmt)] = d
 	}
-	return csvDates
+	return csvDates, allRows
 }
 
 func getCsvAndRequiredDates(input *csv.Reader, streamName string) ([]goment.Goment, []goment.Goment) {
@@ -153,7 +155,7 @@ func getCsvAndRequiredDates(input *csv.Reader, streamName string) ([]goment.Gome
 		fmt.Println("allRecords length:", len(allRecords))
 	}
 
-	csvDates := getCsvDates(allRecords)
+	csvDates, _ := getCsvDates(allRecords)
 
 	// build requiredDates
 	f := 0
