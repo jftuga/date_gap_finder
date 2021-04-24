@@ -29,7 +29,6 @@ import (
 	"github.com/nleeper/goment"
 	"github.com/spf13/cobra"
 	"log"
-	"strings"
 )
 
 /*
@@ -79,16 +78,15 @@ func init() {
 }
 
 func searchAllFiles(args []string) {
-	outputFmt := "L LTS dddd"
 	for _, fname := range args {
 		missingDates := searchOneFile(fname)
 		for i,d := range missingDates {
-			fmt.Printf("[%d] missing: %s\n", i+1, d.Format(outputFmt))
+			fmt.Printf("[%d] missing: %s\n", i+1, d)
 		}
 	}
 }
 
-func searchOneFile(fname string) []*goment.Goment {
+func searchOneFile(fname string) []string {
 	debug := allRootOptions.Debug
 	outputFmt := "L LTS dddd"
 
@@ -113,49 +111,31 @@ func searchOneFile(fname string) []*goment.Goment {
 		}
 	}
 
-	findMissingDates(csvDates, requiredDates)
+	return findMissingDates(csvDates, requiredDates)
 
-	return nil
 }
 
 func isSameOrBefore(csvDate, reqDate goment.Goment) bool {
 	return csvDate.IsSameOrBefore(&reqDate)
 }
 
-func findMissingDates(csvDates, requiredDates []goment.Goment) {
+func findMissingDates(csvDates, requiredDates []goment.Goment) []string {
 	debug := allRootOptions.Debug
 	outputFmt := "L LTS dddd"
 
-	maxDiff := shared.GetDuration(allRootOptions.Amount, allRootOptions.Period)
-	fmt.Println("maxDiff:", maxDiff)
-	// reqDate=key; csvDate(s)=val
-	allCsvBeforeRequired := make(map [string][]string)
+	maxTimeDiff := shared.GetDuration(allRootOptions.Amount, allRootOptions.Period)
 	seenCsvDates := make(map [string]bool)
 	for _, reqDate := range requiredDates {
-		fmt.Println("checking:", reqDate.Format(outputFmt))
 		for _, csvDate := range csvDates {
 			if isSameOrBefore(csvDate, reqDate) {
 				key := reqDate.Format(outputFmt)
-				val := csvDate.Format(outputFmt)
-				// FIXME:
+				// compare the time duration difference
 				diff := shared.GetTimeDifference(csvDate,reqDate)
-				fmt.Println("diff:", diff)
-				allCsvBeforeRequired[key] = append(allCsvBeforeRequired[key], diff.String())
-				if diff.Seconds() < maxDiff.Seconds() {
-					fmt.Println("xxxxx:", key, val)
+				if diff.Seconds() < maxTimeDiff.Seconds() {
 					seenCsvDates[key] = true
 				}
 
 			}
-		}
-	}
-
-	if debug > 98 {
-		fmt.Println()
-		fmt.Println("allCsvBeforeRequired")
-		fmt.Println("====================")
-		for key, reqDate := range allCsvBeforeRequired {
-			fmt.Printf("%32s => %s\n", key, strings.Join(reqDate, "; "))
 		}
 	}
 
@@ -168,18 +148,23 @@ func findMissingDates(csvDates, requiredDates []goment.Goment) {
 		}
 	}
 
-	fmt.Println()
-	fmt.Println("MissingDates")
-	fmt.Println("============")
+	if debug > 98 {
+		fmt.Println()
+		fmt.Println("MissingDates")
+		fmt.Println("============")
+	}
+	var allMissingDates []string
 	for _, reqDate := range requiredDates {
 		toCheck := reqDate.Format(outputFmt)
-		//fmt.Println()
-		//fmt.Println("toCheck:", toCheck)
 		_, ok := seenCsvDates[toCheck]
 		if !ok {
-			fmt.Printf("missing date: %s\n", toCheck)
+			allMissingDates = append(allMissingDates, toCheck)
+			if debug > 98 {
+				fmt.Printf("missing date: %s\n", toCheck)
+			}
 		}
 	}
+	return allMissingDates
 }
 
 func getCsvAndRequiredDates(input *csv.Reader, streamName string) ([]goment.Goment, []goment.Goment) {
