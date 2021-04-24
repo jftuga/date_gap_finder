@@ -128,15 +128,7 @@ func findMissingDates(csvDates, requiredDates []goment.Goment) []string {
 	return allMissingDates
 }
 
-func getCsvAndRequiredDates(input *csv.Reader, streamName string) ([]goment.Goment, []goment.Goment) {
-	allRecords, err := input.ReadAll()
-	if err != nil {
-		log.Fatalf("Error #89533: Unable to read from stream: '%s'; %s\n", streamName, err)
-	}
-	if debugLevel > 98 {
-		fmt.Println("allRecords:", len(allRecords))
-	}
-
+func getCsvDates(allRecords [][]string) []goment.Goment {
 	// build csvDates
 	var csvDates []goment.Goment
 	for i, d := range allRecords {
@@ -149,6 +141,19 @@ func getCsvAndRequiredDates(input *csv.Reader, streamName string) ([]goment.Gome
 		}
 		csvDates = append(csvDates,*g)
 	}
+	return csvDates
+}
+
+func getCsvAndRequiredDates(input *csv.Reader, streamName string) ([]goment.Goment, []goment.Goment) {
+	allRecords, err := input.ReadAll()
+	if err != nil {
+		log.Fatalf("Error #89533: Unable to read from stream: '%s'; %s\n", streamName, err)
+	}
+	if debugLevel > 98 {
+		fmt.Println("allRecords length:", len(allRecords))
+	}
+
+	csvDates := getCsvDates(allRecords)
 
 	// build requiredDates
 	f := 0
@@ -165,7 +170,6 @@ func getCsvAndRequiredDates(input *csv.Reader, streamName string) ([]goment.Gome
 	}
 	lastRec := allRecords[len(allRecords)-1]
 	last, err := goment.New(lastRec[allRootOptions.Column])
-
 	if err != nil {
 		log.Fatalf("Error #30435: Invalid data/time: '%s'; %s\n", lastRec[allRootOptions.Column], err)
 	}

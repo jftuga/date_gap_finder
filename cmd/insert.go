@@ -22,8 +22,11 @@ THE SOFTWARE.
 package cmd
 
 import (
+	"fmt"
 	"github.com/jftuga/date_gap_finder/fileOps"
+	"github.com/nleeper/goment"
 	"github.com/spf13/cobra"
+	"log"
 )
 
 type insertOptions struct {
@@ -65,18 +68,14 @@ func insertAllFiles(args []string) {
 	}
 }
 
-func insertOneFile(fname string) [][]string {
+func insertOneFile3(fname string) [][]string {
 	var dummy [][]string
 	return dummy
 }
 
-/*
-func insertOneFile2(fname string) [][]string {
-	debug := false
-	allMissingDates, layout := searchOneFile(fname)
-	if debug {
-		fmt.Println("layout:", layout)
-	}
+
+func insertOneFile(fname string) [][]string {
+	allMissingDates := searchOneFile(fname)
 	if len(allMissingDates) == 0 {
 		return nil
 	}
@@ -87,86 +86,25 @@ func insertOneFile2(fname string) [][]string {
 		log.Fatalf("Can not read file: '%s'\n%s\n", fname, err)
 	}
 
-	m := 0
-	outputFmt := "L LTS dddd"
+	allCsvDates := getCsvDates(allRecords)
 	var augmentedData [][]string
 
-	for i, current := range allRecords {
-		if allRootOptions.HasHeader && i == 0 {
-			continue
-		}
-
-		currentDateTime, err := goment.New(current[allRootOptions.Column])
+	m := 0
+	for _, csvDate := range allCsvDates {
+		trunc := allMissingDates[m][:18]
+		missing, err := goment.New(trunc) //FIXME
 		if err != nil {
-			log.Fatalf("Can initialize goment struct for: '%s'\n%s",current, err)
+			log.Fatalf("Error #69805: Invalid date/time: '%s'; %s\n", trunc, err)
 		}
-
-		if m < len(allMissingDates) && currentDateTime.IsSameOrBefore(allMissingDates[m]) {
-			if debug {
-				fmt.Printf("IsSameOrBefore: %s - %s\n", current, currentDateTime.Format(outputFmt))
-			}
-			augmentedData = append(augmentedData, current)
+		if isSameOrBefore(csvDate, *missing) {
 			continue
 		}
-
-		if debug && m < len(allMissingDates) {
-			fmt.Println("Newer: ", allMissingDates[m].Format(outputFmt))
-		}
-
-		fmt.Println("iiiiiiiiiii:", i, len(allMissingDates), m)
-		if m == len(allMissingDates) {
-			fmt.Println("DONE")
-			continue
-		}
-		missedDate := allMissingDates[m].ToTime().Format(layout)
-		missingRecord := make(map [int]string)
-		missingRecord[allRootOptions.Column] = missedDate
-		for _, column := range allInsertOptions.columnInserts {
-			if debug {
-				fmt.Println("kv:",column)
-			}
-			col, val := shared.GetKeyVal(column)
-			missingRecord[col] = val
-		}
-		if debug {
-			fmt.Println("missingRecord:", missingRecord)
-		}
-		keys, last := shared.SortIntMapByKey(missingRecord)
-		if debug {
-			fmt.Println("keys, last:", keys, last)
-		}
-		var newRow []string
-		for i=0; i <= last; i++{
-			if val, ok := missingRecord[i]; ok {
-				newRow = append(newRow, val)
-				if debug {
-					fmt.Println("appending:", val)
-				}
-			} else {
-				newRow = append(newRow, "")
-			}
-		}
-		newRow[allRootOptions.Column] = missedDate
-		augmentedData = append(augmentedData, newRow)
-		augmentedData = append(augmentedData, current)
+		fmt.Println("do something with:", csvDate.Format(dateOutputFmt), missing.Format(dateOutputFmt), m)
 		m += 1
-
-		if debug {
-			fmt.Println("-----------------------------------------------")
-		}
 	}
 
-	output := fileOps.CsvOpenWriteBuf()
-	err = output.WriteAll(augmentedData)
-	if err != nil {
-		log.Fatalf("Unable to save CSV data: %s\n",err)
-	}
 
-	if debug {
-		for _, rec := range augmentedData {
-			fmt.Println(rec)
-		}
-	}
+
+
 	return augmentedData
 }
-*/
