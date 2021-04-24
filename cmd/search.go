@@ -29,6 +29,7 @@ import (
 	"github.com/nleeper/goment"
 	"github.com/spf13/cobra"
 	"log"
+	"strings"
 )
 
 /*
@@ -88,14 +89,101 @@ func searchAllFiles(args []string) {
 }
 
 func searchOneFile(fname string) []*goment.Goment {
-	fileOps.CsvOpenRead(fname)
-	input := fileOps.CsvOpenRead(fname)
-	return searchFromReader(input, fname)
-}
-
-func searchFromReader(input *csv.Reader, streamName string) []*goment.Goment {
 	debug := allRootOptions.Debug
 	outputFmt := "L LTS dddd"
+
+	fileOps.CsvOpenRead(fname)
+	input := fileOps.CsvOpenRead(fname)
+	csvDates, requiredDates := getCsvAndRequiredDates(input, fname)
+
+	if debug > 98 {
+		fmt.Println("csvDates")
+		fmt.Println("========")
+		for _, d := range csvDates {
+			fmt.Println(d.Format(outputFmt))
+		}
+	}
+
+	if debug > 98  {
+		fmt.Println()
+		fmt.Println("requiredDates")
+		fmt.Println("=============")
+		for _, d := range requiredDates {
+			fmt.Println(d.Format(outputFmt))
+		}
+	}
+
+	findMissingDates(csvDates, requiredDates)
+
+	return nil
+}
+
+func isSameOrBefore(csvDate, reqDate goment.Goment) bool {
+	return csvDate.IsSameOrBefore(&reqDate)
+}
+
+func findMissingDates(csvDates, requiredDates []goment.Goment) {
+	debug := allRootOptions.Debug
+	outputFmt := "L LTS dddd"
+
+	maxDiff := shared.GetDuration(allRootOptions.Amount, allRootOptions.Period)
+	fmt.Println("maxDiff:", maxDiff)
+	// reqDate=key; csvDate(s)=val
+	allCsvBeforeRequired := make(map [string][]string)
+	seenCsvDates := make(map [string]bool)
+	for _, reqDate := range requiredDates {
+		fmt.Println("checking:", reqDate.Format(outputFmt))
+		for _, csvDate := range csvDates {
+			if isSameOrBefore(csvDate, reqDate) {
+				key := reqDate.Format(outputFmt)
+				val := csvDate.Format(outputFmt)
+				// FIXME:
+				diff := shared.GetTimeDifference(csvDate,reqDate)
+				fmt.Println("diff:", diff)
+				allCsvBeforeRequired[key] = append(allCsvBeforeRequired[key], diff.String())
+				if diff.Seconds() < maxDiff.Seconds() {
+					fmt.Println("xxxxx:", key, val)
+					seenCsvDates[key] = true
+				}
+
+			}
+		}
+	}
+
+	if debug > 98 {
+		fmt.Println()
+		fmt.Println("allCsvBeforeRequired")
+		fmt.Println("====================")
+		for key, reqDate := range allCsvBeforeRequired {
+			fmt.Printf("%32s => %s\n", key, strings.Join(reqDate, "; "))
+		}
+	}
+
+	if debug > 98 {
+		fmt.Println()
+		fmt.Println("seenCsvDates")
+		fmt.Println("============")
+		for key := range seenCsvDates {
+			fmt.Println(key)
+		}
+	}
+
+	fmt.Println()
+	fmt.Println("MissingDates")
+	fmt.Println("============")
+	for _, reqDate := range requiredDates {
+		toCheck := reqDate.Format(outputFmt)
+		//fmt.Println()
+		//fmt.Println("toCheck:", toCheck)
+		_, ok := seenCsvDates[toCheck]
+		if !ok {
+			fmt.Printf("missing date: %s\n", toCheck)
+		}
+	}
+}
+
+func getCsvAndRequiredDates(input *csv.Reader, streamName string) ([]goment.Goment, []goment.Goment) {
+	debug := allRootOptions.Debug
 
 	allRecords, err := input.ReadAll()
 	if err != nil {
@@ -105,6 +193,7 @@ func searchFromReader(input *csv.Reader, streamName string) []*goment.Goment {
 		fmt.Println("allRecords:", len(allRecords))
 	}
 
+	// build csvDates
 	var csvDates []goment.Goment
 	for i, d := range allRecords {
 		if allRootOptions.HasHeader && i == 0 {
@@ -117,14 +206,7 @@ func searchFromReader(input *csv.Reader, streamName string) []*goment.Goment {
 		csvDates = append(csvDates,*g)
 	}
 
-	if debug > 98 {
-		fmt.Println("csvDates")
-		fmt.Println("========")
-		for _, d := range csvDates {
-			fmt.Println(d.Format(outputFmt))
-		}
-	}
-
+	// build requiredDates
 	f := 0
 	if allRootOptions.HasHeader {
 		f = 1
@@ -139,12 +221,14 @@ func searchFromReader(input *csv.Reader, streamName string) []*goment.Goment {
 	}
 	lastRec := allRecords[len(allRecords)-1]
 	last, err := goment.New(lastRec[allRootOptions.Column])
+	//fmt.Println("last:", last.Format("L LTS dddd"))
+
 	if err != nil {
 		log.Fatalf("Error #30435: Invalid data/time: '%s'; %s\n", lastRec[allRootOptions.Column], err)
 	}
 
 	var requiredDates []goment.Goment
-	durationInSeconds := shared.GetDuration(allRootOptions.Amount, allRootOptions.Period)
+	durationInSeconds := shared.GetDurationInSeconds(allRootOptions.Amount, allRootOptions.Period)
 	current, _ := goment.New(first)
 	for {
 		if current.IsAfter(last) {
@@ -153,43 +237,35 @@ func searchFromReader(input *csv.Reader, streamName string) []*goment.Goment {
 		requiredDates = append(requiredDates, *current)
 		current.Add(durationInSeconds, "seconds")
 	}
+	requiredDates = append(requiredDates, *current)
 
-	if debug > 98  {
-		fmt.Println()
-		fmt.Println("requiredDates")
-		fmt.Println("=============")
-		for _, d := range requiredDates {
-			fmt.Println(d.Format(outputFmt))
-		}
-	}
+	return csvDates, requiredDates
+}
 
-	if debug > 98  {
-		fmt.Println()
-		fmt.Println("comparison")
-		fmt.Println("==========")
-	}
+func checkCSVDate(csvDates []goment.Goment, reqDate *goment.Goment) []*goment.Goment {
+	debug := allRootOptions.Debug
+	outputFmt := "L LTS dddd"
+
 	var allMissingDates []*goment.Goment
-	for h, reqDate := range requiredDates {
-		for i, csvDate := range csvDates {
-			result := csvDate.IsSameOrBefore(&reqDate)
-			if debug > 98  {
-				fmt.Println("csv:", csvDate.Format(outputFmt), "[sameOrBefore]", "req:", reqDate.Format(outputFmt), "=>", result)
-			}
-			if result {
-				fmt.Println("Removing from CSV:", csvDates[i].Format(outputFmt))
-				csvDates = shared.RemoveIndex(csvDates,i)
-				break
-			} else {
-				if debug > 98  {
-					fmt.Println("missing date:", reqDate.Format(outputFmt))
-				}
-				allMissingDates = append(allMissingDates, &requiredDates[h])
-				break
-			}
-		}
+	for i, csvDate := range csvDates {
+		result := csvDate.IsSameOrBefore(reqDate)
 		if debug > 98  {
-			fmt.Println("---------------")
+			fmt.Println("csv:", csvDate.Format(outputFmt), "[sameOrBefore]", "req:", reqDate.Format(outputFmt), "=>", result)
 		}
+		if result {
+			fmt.Println("Removing from CSV:", csvDates[i].Format(outputFmt))
+			csvDates = shared.RemoveIndex(csvDates,i)
+			break
+		} else {
+			if debug > 98  {
+				fmt.Println("missing date:", reqDate.Format(outputFmt))
+			}
+			allMissingDates = append(allMissingDates, reqDate)
+			break
+		}
+	}
+	if debug > 98  {
+		fmt.Println("---------------")
 	}
 	return allMissingDates
 }
