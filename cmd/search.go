@@ -41,9 +41,6 @@ var searchCmd = &cobra.Command{
 	},
 }
 
-var dateOutputFmt string = "L LTS dddd"
-var debugLevel int = allRootOptions.Debug
-
 func init() {
 	rootCmd.AddCommand(searchCmd)
 }
@@ -80,7 +77,6 @@ func searchOneFile(fname string) []string {
 	}
 
 	return findMissingDates(csvDates, requiredDates)
-
 }
 
 func isSameOrBefore(csvDate, reqDate goment.Goment) bool {
