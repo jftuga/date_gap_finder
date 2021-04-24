@@ -31,16 +31,6 @@ import (
 	"log"
 )
 
-/*
-type searchOptions struct {
-	Column int
-	HasHeader bool
-	Amount int
-	Period string
-}
-
-var allSearchOptions searchOptions
-*/
 // searchCmd represents the search command
 var searchCmd = &cobra.Command{
 	Use:   "search",
@@ -52,29 +42,12 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		//fmt.Println("search called")
 		searchAllFiles(args)
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(searchCmd)
-	/*
-	searchCmd.PersistentFlags().IntVarP(&allSearchOptions.Column, "column", "c", 0, "CSV column number (starts at zero)")
-	searchCmd.PersistentFlags().BoolVarP(&allSearchOptions.HasHeader, "header", "H", true, "if CSV file has header line")
-	searchCmd.PersistentFlags().IntVarP(&allSearchOptions.Amount, "amount", "a", -1, "a maximum, numeric duration")
-	searchCmd.PersistentFlags().StringVarP(&allSearchOptions.Period, "period", "p", "", "period of time, such as: days, hours, minutes")
-	*/
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// searchCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// searchCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
 func searchAllFiles(args []string) {
@@ -206,7 +179,6 @@ func getCsvAndRequiredDates(input *csv.Reader, streamName string) ([]goment.Gome
 	}
 	lastRec := allRecords[len(allRecords)-1]
 	last, err := goment.New(lastRec[allRootOptions.Column])
-	//fmt.Println("last:", last.Format("L LTS dddd"))
 
 	if err != nil {
 		log.Fatalf("Error #30435: Invalid data/time: '%s'; %s\n", lastRec[allRootOptions.Column], err)
@@ -225,32 +197,4 @@ func getCsvAndRequiredDates(input *csv.Reader, streamName string) ([]goment.Gome
 	requiredDates = append(requiredDates, *current)
 
 	return csvDates, requiredDates
-}
-
-func checkCSVDate(csvDates []goment.Goment, reqDate *goment.Goment) []*goment.Goment {
-	debug := allRootOptions.Debug
-	outputFmt := "L LTS dddd"
-
-	var allMissingDates []*goment.Goment
-	for i, csvDate := range csvDates {
-		result := csvDate.IsSameOrBefore(reqDate)
-		if debug > 98  {
-			fmt.Println("csv:", csvDate.Format(outputFmt), "[sameOrBefore]", "req:", reqDate.Format(outputFmt), "=>", result)
-		}
-		if result {
-			fmt.Println("Removing from CSV:", csvDates[i].Format(outputFmt))
-			csvDates = shared.RemoveIndex(csvDates,i)
-			break
-		} else {
-			if debug > 98  {
-				fmt.Println("missing date:", reqDate.Format(outputFmt))
-			}
-			allMissingDates = append(allMissingDates, reqDate)
-			break
-		}
-	}
-	if debug > 98  {
-		fmt.Println("---------------")
-	}
-	return allMissingDates
 }
