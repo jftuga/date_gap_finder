@@ -24,7 +24,6 @@ package cmd
 import (
 	"fmt"
 	"github.com/jftuga/date_gap_finder/fileOps"
-	"github.com/nleeper/goment"
 	"github.com/spf13/cobra"
 	"log"
 )
@@ -86,25 +85,18 @@ func insertOneFile(fname string) [][]string {
 		log.Fatalf("Can not read file: '%s'\n%s\n", fname, err)
 	}
 
-	allCsvDates := getCsvDates(allRecords)
+	allCsvDates, allRows := getCsvDates(allRecords)
 	var augmentedData [][]string
 
 	m := 0
 	for _, csvDate := range allCsvDates {
-		trunc := allMissingDates[m][:18]
-		missing, err := goment.New(trunc) //FIXME
-		if err != nil {
-			log.Fatalf("Error #69805: Invalid date/time: '%s'; %s\n", trunc, err)
-		}
-		if isSameOrBefore(csvDate, *missing) {
+		if isSameOrBefore(csvDate, allMissingDates[m]) {
+			augmentedData = append(augmentedData, allRows[csvDate.Format(dateOutputFmt)])
 			continue
 		}
-		fmt.Println("do something with:", csvDate.Format(dateOutputFmt), missing.Format(dateOutputFmt), m)
+		fmt.Println("do something with:", csvDate.Format(dateOutputFmt), allMissingDates[m].Format(dateOutputFmt), m)
+		augmentedData = append(augmentedData, []string {allMissingDates[m].Format(dateOutputFmt)})
 		m += 1
 	}
-
-
-
-
 	return augmentedData
 }
