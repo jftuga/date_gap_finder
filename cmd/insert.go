@@ -106,10 +106,18 @@ func insertOneFile(fname string) []string {
 	}
 
 	var csvRecords []string
-	for _, rec := range allRecords {
+	var headerRow []string
+	for i, rec := range allRecords {
+		if allRootOptions.HasHeader && i == 0 {
+			headerRow = rec
+			continue
+		}
 		csvRecords = append(csvRecords, strings.Join(rec,","))
 	}
 	sortRecords(csvRecords)
+	if allRootOptions.HasHeader {
+		csvRecords = append([]string {strings.Join(headerRow,",")}, csvRecords...)
+	}
 
 	fmt.Println()
 	fmt.Println("csvRecords")
