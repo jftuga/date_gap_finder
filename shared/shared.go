@@ -2,6 +2,7 @@ package shared
 
 import (
 	"fmt"
+	"github.com/araddon/dateparse"
 	"github.com/nleeper/goment"
 	"log"
 	"sort"
@@ -97,4 +98,13 @@ func GetTimeDifference(a, b goment.Goment) time.Duration {
 	bTime := b.ToTime()
 	d := bTime.Sub(aTime)
 	return d
+}
+
+// ConvertDate - convert a date to a different layout
+func ConvertDate(t time.Time, layoutAny string) string {
+	layout, err := dateparse.ParseFormat(layoutAny)
+	if err != nil {
+		log.Fatalf("Error #80050: Can parse '%s'; %s\n", layoutAny, err)
+	}
+	return t.Format(layout)
 }
