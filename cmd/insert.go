@@ -67,12 +67,6 @@ func insertAllFiles(args []string) {
 	}
 }
 
-func insertOneFile3(fname string) [][]string {
-	var dummy [][]string
-	return dummy
-}
-
-
 func insertOneFile(fname string) []string {
 	debug := allRootOptions.Debug
 	allMissingDates := searchOneFile(fname)
