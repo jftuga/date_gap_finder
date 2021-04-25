@@ -60,6 +60,9 @@ func insertAllFiles(args []string) {
 		if augmentedData == nil {
 			return
 		}
+		for _, aug := range augmentedData {
+			fmt.Println(aug)
+		}
 		//fileOps.SaveToCsv(fname, augmentedData)
 	}
 }
@@ -71,6 +74,7 @@ func insertOneFile3(fname string) [][]string {
 
 
 func insertOneFile(fname string) []string {
+	debug := allRootOptions.Debug
 	allMissingDates := searchOneFile(fname)
 	if len(allMissingDates) == 0 {
 		return nil
@@ -81,16 +85,22 @@ func insertOneFile(fname string) []string {
 	if err != nil {
 		log.Fatalf("Can not read file: '%s'\n%s\n", fname, err)
 	}
-	fmt.Println("allRecords len:", len(allRecords))
+	if debug > 9998 {
+		fmt.Println("allRecords len:", len(allRecords))
+	}
 	row := 0
 	if allRootOptions.HasHeader {
 		row = 1
 	}
 	layout := allRecords[row][allRootOptions.Column]
-	fmt.Println("layout:", layout)
+	if debug > 9998 {
+		fmt.Println("layout:", layout)
+	}
 
 	allCsvDates, allRows := getCsvDates(allRecords)
-	fmt.Printf("allCsvDates len: %d, allRows len: %d\n", len(allCsvDates), len(allRows))
+	if debug > 9998 {
+		fmt.Printf("allCsvDates len: %d, allRows len: %d\n", len(allCsvDates), len(allRows))
+	}
 
 	for _, m := range allMissingDates {
 		csvStyleDate := shared.ConvertDate(m.ToTime(), layout)
@@ -98,11 +108,13 @@ func insertOneFile(fname string) []string {
 		allRecords = append(allRecords, newRow)
 	}
 
-	fmt.Println()
-	fmt.Println("allRecords")
-	fmt.Println("=============")
-	for _, rec := range allRecords {
-		fmt.Println(rec)
+	if debug > 9998 {
+		fmt.Println()
+		fmt.Println("allRecords")
+		fmt.Println("=============")
+		for _, rec := range allRecords {
+			fmt.Println(rec)
+		}
 	}
 
 	var csvRecords []string
@@ -119,11 +131,13 @@ func insertOneFile(fname string) []string {
 		csvRecords = append([]string {strings.Join(headerRow,",")}, csvRecords...)
 	}
 
-	fmt.Println()
-	fmt.Println("csvRecords")
-	fmt.Println("=============")
-	for _, rec := range csvRecords {
-		fmt.Println(rec)
+	if debug > 9998 {
+		fmt.Println()
+		fmt.Println("csvRecords")
+		fmt.Println("=============")
+		for _, rec := range csvRecords {
+			fmt.Println(rec)
+		}
 	}
 
 	return csvRecords
