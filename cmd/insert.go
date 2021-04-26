@@ -41,7 +41,7 @@ var allInsertOptions insertOptions
 var insertCmd = &cobra.Command{
 	Use:   "insert",
 	Short: "insert missing CSV entries",
-	Long: `CSV dates are assumed to be oldest to newest within the file.
+	Long: `CSV dates are assumed to be sorted from oldest to newest within the file.
 Multiple -r options can be used.  Each -r option is comma-delimited with
 the column number first and the value to insert (into that column) second.`,
 	Run: func(cmd *cobra.Command, args []string) {

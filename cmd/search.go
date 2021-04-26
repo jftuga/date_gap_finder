@@ -35,7 +35,7 @@ import (
 var searchCmd = &cobra.Command{
 	Use:   "search",
 	Short: "search CSV files for missing dates",
-	Long: `CSV dates are assumed to be oldest to newest within the file.`,
+	Long: `CSV dates are assumed to be sorted from oldest to newest within the file.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		searchAllFiles(args)
 	},
