@@ -6,11 +6,11 @@
 Searches for missing dates with in CSV files and optionally insert new CSV entries for those missing dates
 
 ## Motivation
-I have many automated tasks that will add data to a CSV file each day.  However, if for some reason that task does not
-run, there is a possibility that I will not be notified.  Each of these CSV tasks are monitored via a Grafana dashboard
-using the [grafana-csv-datasource](https://github.com/marcusolsson/grafana-csv-datasource) data source plugin.  This
-allows me to quickly the status of all tasks.  When a task has missed a day, this program can insert data letting me know
-that it was not run.
+I have many automated tasks that will add data to CSV files (one per task) each day.  However, if for some reason that 
+task does not run, there is a possibility that I will not be notified.  Each of these CSV tasks are monitored via a 
+Grafana dashboard using the [grafana-csv-datasource](https://github.com/marcusolsson/grafana-csv-datasource) data source
+plugin.  This allows me to quickly view the status of all automated tasks.  When a task has missed a day, then this 
+program will insert CSV data in such a way that I will be notified that a task was not run.
 
 ## Usage
 ```
