@@ -111,16 +111,27 @@ func insertOneFile(fname string) []string {
 		}
 	}
 
+	sortedRecords := allRecords
+	sortRecords(sortedRecords)
+	if debug > 9998 {
+		fmt.Println()
+		fmt.Println("sortedRecords")
+		fmt.Println("=============")
+		for _, rec := range sortedRecords {
+			fmt.Println(rec)
+		}
+	}
+
 	var csvRecords []string
 	var headerRow []string
-	for i, rec := range allRecords {
-		if allRootOptions.HasHeader && i == 0 {
+	for i, rec := range sortedRecords {
+		if allRootOptions.HasHeader && i == len(sortedRecords)-1 {
 			headerRow = rec
+			//fmt.Println("headerRow:", headerRow)
 			continue
 		}
 		csvRecords = append(csvRecords, strings.Join(rec,","))
 	}
-	sortRecords(csvRecords)
 	if allRootOptions.HasHeader {
 		csvRecords = append([]string {strings.Join(headerRow,",")}, csvRecords...)
 	}
@@ -134,14 +145,27 @@ func insertOneFile(fname string) []string {
 		}
 	}
 
+	if debug > 9998 {
+		fmt.Println()
+		fmt.Println("==========================================================")
+		fmt.Println()
+	}
 	return csvRecords
 }
 
+func sortRecords(entry [][]string) {
+	sort.SliceStable(entry, func(i, j int) bool {
+		return entry[i][allRootOptions.Column] < entry[j][allRootOptions.Column]
+	})
+}
+
+/*
 func sortRecords(entry []string) {
 	sort.Slice(entry, func(i, j int) bool {
 		return entry[i] < entry[j]
 	})
 }
+*/
 
 func createNewRow(missedDate string) []string {
 	debug := allRootOptions.Debug
