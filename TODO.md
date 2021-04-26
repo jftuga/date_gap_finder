@@ -6,4 +6,5 @@
 * -d = specify a different delimiter
 * make sure CSV files using double-quotes is handled correctly
 * finish off README.md
+* search output should be the same a CSV date format  
 * testing
