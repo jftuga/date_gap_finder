@@ -29,6 +29,7 @@ import (
 	"github.com/nleeper/goment"
 	"github.com/spf13/cobra"
 	"log"
+	"strings"
 )
 
 // searchCmd represents the search command
@@ -118,12 +119,24 @@ func findMissingDates(csvDates, requiredDates []goment.Goment) []goment.Goment {
 		fmt.Println("MissingDates")
 		fmt.Println("============")
 	}
+
+	var allSkipDaysLower string
+	if len(allRootOptions.SkipDays) > 0 {
+		allSkipDaysLower = strings.ToLower(allRootOptions.SkipDays)
+	}
 	var allMissingDates []goment.Goment
 	for _, reqDate := range requiredDates {
 		toCheck := reqDate.Format(dateOutputFmt)
 		if allRootOptions.SkipWeekends && (reqDate.Format("dddd") == "Saturday" || reqDate.Format("dddd") == "Sunday") {
 			if debugLevel > 98 {
 				fmt.Println("skipping weekend:", reqDate.Format(dateOutputFmt))
+			}
+			continue
+		}
+		skipDayLower := strings.ToLower(reqDate.Format("dddd"))
+		if len(allRootOptions.SkipDays) > 0 && strings.Index(allSkipDaysLower,skipDayLower) >= 0 {
+			if debugLevel > 98 {
+				fmt.Println("skipping day:", reqDate.Format(dateOutputFmt))
 			}
 			continue
 		}

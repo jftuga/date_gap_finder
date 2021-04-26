@@ -38,6 +38,7 @@ type rootOptions struct {
 	Amount int
 	Period string
 	SkipWeekends bool
+	SkipDays string
 	Debug int
 }
 
@@ -69,6 +70,7 @@ func init() {
 	rootCmd.PersistentFlags().IntVarP(&allRootOptions.Amount, "amount", "a", -1, "a maximum, numeric duration")
 	rootCmd.PersistentFlags().StringVarP(&allRootOptions.Period, "period", "p", "", "period of time, such as: days, hours, minutes")
 	rootCmd.PersistentFlags().BoolVarP(&allRootOptions.SkipWeekends, "skipWeekends", "s", false, "allow gaps on weekends when set")
+	rootCmd.PersistentFlags().StringVarP(&allRootOptions.SkipDays, "skipDays", "S", "", "skip comma-delimited set of fully spelled out days")
 	rootCmd.PersistentFlags().IntVarP(&allRootOptions.Debug, "debug", "D", 0, "enable verbose debugging, set to 999 or 9999")
 
 	// Cobra also supports local flags, which will only run
