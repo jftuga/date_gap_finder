@@ -33,6 +33,7 @@ import (
 
 type insertOptions struct {
 	columnInserts []string
+	Overwrite bool
 }
 
 var allInsertOptions insertOptions
@@ -52,6 +53,7 @@ the column number first and the value to insert (into that column) second.`,
 func init() {
 	rootCmd.AddCommand(insertCmd)
 	insertCmd.Flags().StringArrayVarP(&allInsertOptions.columnInserts, "record", "r", []string{}, "insert record with missing date")
+	insertCmd.PersistentFlags().BoolVarP(&allInsertOptions.Overwrite, "overwrite", "O", false, "overwrite existing CSV file; original file saved as .bak")
 }
 
 func insertAllFiles(args []string) {
@@ -60,10 +62,12 @@ func insertAllFiles(args []string) {
 		if augmentedData == nil {
 			return
 		}
+		if allInsertOptions.Overwrite {
+			fileOps.OverwriteCsv(fname, augmentedData)
+		}
 		for _, aug := range augmentedData {
 			fmt.Println(aug)
 		}
-		//fileOps.SaveToCsv(fname, augmentedData)
 	}
 }
 
@@ -74,7 +78,7 @@ func insertOneFile(fname string) []string {
 		return nil
 	}
 
-	input := fileOps.CsvOpenRead(fname)
+	input, file := fileOps.CsvOpenRead(fname)
 	allRecords, err := input.ReadAll()
 	if err != nil {
 		log.Fatalf("Can not read file: '%s'\n%s\n", fname, err)
@@ -82,6 +86,12 @@ func insertOneFile(fname string) []string {
 	if debug > 9998 {
 		fmt.Println("allRecords len:", len(allRecords))
 	}
+	err = file.Close()
+	if err != nil {
+		log.Fatalf("Error #15265: Unable to close CSV file: '%s'; %s\n", fname, err)
+		return nil
+	}
+
 	row := 0
 	if allRootOptions.HasHeader {
 		row = 1

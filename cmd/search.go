@@ -57,8 +57,9 @@ func searchAllFiles(args []string) {
 func searchOneFile(fname string) []goment.Goment {
 	debugLevel := allRootOptions.Debug
 	fileOps.CsvOpenRead(fname)
-	input := fileOps.CsvOpenRead(fname)
+	input, file := fileOps.CsvOpenRead(fname)
 	csvDates, requiredDates := getCsvAndRequiredDates(input, fname)
+	file.Close()
 
 	if debugLevel > 98 {
 		fmt.Println("csvDates")
