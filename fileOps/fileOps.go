@@ -1,6 +1,7 @@
 package fileOps
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/csv"
 	"github.com/jftuga/date_gap_finder/filecopy"
@@ -73,9 +74,9 @@ func OverwriteCsv(fname string, data []string) bool {
 		log.Fatalf("Error #20055: Unable to open file for writing: '%s'; %s\n", fname, err)
 		return false
 	}
-	w := csv.NewWriter(file)
+	w := bufio.NewWriter(file)
 	for _, row := range data {
-		err = w.Write([]string{row})
+		_, err = w.WriteString(row + "\n")
 		if err != nil {
 			log.Fatalf("Error #20060: Unable to write CSV data to file: '%s'; %s\n", fname, err)
 			return false
