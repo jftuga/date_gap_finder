@@ -59,6 +59,13 @@ func searchOneFile(fname string) []goment.Goment {
 	debugLevel := allRootOptions.Debug
 	fileOps.CsvOpenRead(fname)
 	input, file := fileOps.CsvOpenRead(fname)
+	var r []rune
+	if allRootOptions.CsvDelimiter == `\t` {
+		r = []rune{'\t'}
+	} else {
+		r = []rune(allRootOptions.CsvDelimiter)
+	}
+	input.Comma = r[0]
 	csvDates, requiredDates := getCsvAndRequiredDates(input, fname)
 	file.Close()
 

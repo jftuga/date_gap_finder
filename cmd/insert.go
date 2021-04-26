@@ -79,6 +79,13 @@ func insertOneFile(fname string) []string {
 	}
 
 	input, file := fileOps.CsvOpenRead(fname)
+	var r []rune
+	if allRootOptions.CsvDelimiter == `\t` {
+		r = []rune{'\t'}
+	} else {
+		r = []rune(allRootOptions.CsvDelimiter)
+	}
+	input.Comma = r[0]
 	allRecords, err := input.ReadAll()
 	if err != nil {
 		log.Fatalf("Can not read file: '%s'\n%s\n", fname, err)
@@ -134,16 +141,20 @@ func insertOneFile(fname string) []string {
 
 	var csvRecords []string
 	var headerRow []string
+	delimiter := allRootOptions.CsvDelimiter
+	if delimiter == "\\t" {
+		delimiter = fmt.Sprintf("%c", 0x09)
+	}
 	for i, rec := range sortedRecords {
 		if allRootOptions.HasHeader && i == len(sortedRecords)-1 {
 			headerRow = rec
 			//fmt.Println("headerRow:", headerRow)
 			continue
 		}
-		csvRecords = append(csvRecords, strings.Join(rec,","))
+		csvRecords = append(csvRecords, strings.Join(rec,delimiter))
 	}
 	if allRootOptions.HasHeader {
-		csvRecords = append([]string {strings.Join(headerRow,",")}, csvRecords...)
+		csvRecords = append([]string {strings.Join(headerRow,delimiter)}, csvRecords...)
 	}
 
 	if debug > 9998 {

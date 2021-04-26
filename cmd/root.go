@@ -39,6 +39,7 @@ type rootOptions struct {
 	Period string
 	SkipWeekends bool
 	SkipDays string
+	CsvDelimiter string
 	Debug int
 }
 
@@ -69,6 +70,7 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&allRootOptions.SkipWeekends, "skipWeekends", "s", false, "allow gaps on weekends when set")
 	rootCmd.PersistentFlags().StringVarP(&allRootOptions.SkipDays, "skipDays", "S", "", "skip comma-delimited set of fully spelled out days")
 	rootCmd.PersistentFlags().IntVarP(&allRootOptions.Debug, "debug", "D", 0, "enable verbose debugging, set to 999 or 9999")
+	rootCmd.PersistentFlags().StringVarP(&allRootOptions.CsvDelimiter, "delimiter", "d", ",", "CSV delimiter")
 
 	versionTemplate := fmt.Sprintf("%s v%s\n%s\n", pgmName, pgmVersion, pgmURL)
 	rootCmd.SetVersionTemplate(versionTemplate)
