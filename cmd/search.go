@@ -55,6 +55,7 @@ func searchAllFiles(args []string) {
 }
 
 func searchOneFile(fname string) []goment.Goment {
+	debugLevel := allRootOptions.Debug
 	fileOps.CsvOpenRead(fname)
 	input := fileOps.CsvOpenRead(fname)
 	csvDates, requiredDates := getCsvAndRequiredDates(input, fname)
@@ -84,6 +85,8 @@ func isSameOrBefore(csvDate, reqDate goment.Goment) bool {
 }
 
 func findMissingDates(csvDates, requiredDates []goment.Goment) []goment.Goment {
+	debugLevel := allRootOptions.Debug
+
 	maxTimeDiff := shared.GetDuration(allRootOptions.Amount, allRootOptions.Period)
 	seenDates := make(map [string]bool)
 	for _, reqDate := range requiredDates {
@@ -117,6 +120,12 @@ func findMissingDates(csvDates, requiredDates []goment.Goment) []goment.Goment {
 	var allMissingDates []goment.Goment
 	for _, reqDate := range requiredDates {
 		toCheck := reqDate.Format(dateOutputFmt)
+		if allRootOptions.SkipWeekends && (reqDate.Format("dddd") == "Saturday" || reqDate.Format("dddd") == "Sunday") {
+			if debugLevel > 98 {
+				fmt.Println("skipping weekend:", reqDate.Format(dateOutputFmt))
+			}
+			continue
+		}
 		_, ok := seenDates[toCheck]
 		if !ok {
 			allMissingDates = append(allMissingDates, reqDate)
@@ -125,6 +134,13 @@ func findMissingDates(csvDates, requiredDates []goment.Goment) []goment.Goment {
 			}
 		}
 	}
+
+	if debugLevel > 98 {
+		fmt.Println()
+		fmt.Println("==========================================================")
+		fmt.Println()
+	}
+
 	return allMissingDates
 }
 
