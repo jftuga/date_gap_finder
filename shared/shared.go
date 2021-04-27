@@ -29,7 +29,7 @@ func GetKeyVal(combined string) (int,string) {
 	return i, strings.TrimSpace(slots[1])
 }
 
-// SortIntMapByKey return a map sorted by key and also return the largest key value
+// SortIntMapByKey return a slice sorted by key and also return the largest key value
 func SortIntMapByKey(m map[int]string) ([]int,int) {
 	keys := make([]int, len(m))
 	i := 0

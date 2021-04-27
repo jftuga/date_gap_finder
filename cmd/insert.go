@@ -33,6 +33,7 @@ import (
 
 type insertOptions struct {
 	columnInserts []string
+	allColumnInserts string
 	Overwrite bool
 }
 
@@ -52,7 +53,8 @@ the column number first and the value to insert (into that column) second.`,
 
 func init() {
 	rootCmd.AddCommand(insertCmd)
-	insertCmd.Flags().StringArrayVarP(&allInsertOptions.columnInserts, "record", "r", []string{}, "insert record with missing date")
+	insertCmd.Flags().StringArrayVarP(&allInsertOptions.columnInserts, "record", "r", []string{}, "insert record with missing data")
+	insertCmd.Flags().StringVarP(&allInsertOptions.allColumnInserts, "allRecords", "R", "", "insert data to all columns of a missing row")
 	insertCmd.PersistentFlags().BoolVarP(&allInsertOptions.Overwrite, "overwrite", "O", false, "overwrite existing CSV file; original file saved as .bak")
 }
 
@@ -104,6 +106,7 @@ func insertOneFile(fname string) []string {
 		row = 1
 	}
 	layout := allRecords[row][allRootOptions.Column]
+	numOfColumns := len(allRecords[row])
 	if debug > 9998 {
 		fmt.Println("layout:", layout)
 	}
@@ -115,7 +118,7 @@ func insertOneFile(fname string) []string {
 
 	for _, m := range allMissingDates {
 		csvStyleDate := shared.ConvertDate(m.ToTime(), layout)
-		newRow := createNewRow(csvStyleDate)
+		newRow := createNewRow(csvStyleDate, numOfColumns)
 		allRecords = append(allRecords, newRow)
 	}
 
@@ -180,15 +183,7 @@ func sortRecords(entry [][]string) {
 	})
 }
 
-/*
-func sortRecords(entry []string) {
-	sort.Slice(entry, func(i, j int) bool {
-		return entry[i] < entry[j]
-	})
-}
-*/
-
-func createNewRow(missedDate string) []string {
+func createNewRow(missedDate string, numOfColumns int) []string {
 	debug := allRootOptions.Debug
 	missingRecord := make(map [int]string)
 	missingRecord[allRootOptions.Column] = missedDate
@@ -218,5 +213,23 @@ func createNewRow(missedDate string) []string {
 		}
 	}
 	newRow[allRootOptions.Column] = missedDate
+
+	if len(newRow)+1 <= numOfColumns {
+		for i := len(newRow); i < numOfColumns; i++ {
+			newRow = append(newRow, "")
+			if debug > 9998 {
+				fmt.Printf("[%d] adding column to newRow\n", i)
+			}
+		}
+	}
+
+	if len(allInsertOptions.allColumnInserts) > 0 {
+		for i := 0; i < numOfColumns; i ++ {
+			if newRow[i] == "" {
+				newRow[i] = allInsertOptions.allColumnInserts
+			}
+		}
+	}
+
 	return newRow
 }
