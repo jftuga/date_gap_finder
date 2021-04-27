@@ -29,6 +29,7 @@ import (
 	"github.com/nleeper/goment"
 	"github.com/spf13/cobra"
 	"log"
+	"os"
 	"strings"
 )
 
@@ -38,7 +39,8 @@ var searchCmd = &cobra.Command{
 	Short: "search CSV files for missing dates",
 	Long: `CSV dates are assumed to be sorted from oldest to newest within the file.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		searchAllFiles(args)
+		total := searchAllFiles(args)
+		os.Exit(total)
 	},
 }
 
@@ -46,18 +48,22 @@ func init() {
 	rootCmd.AddCommand(searchCmd)
 }
 
-func searchAllFiles(args []string) {
+func searchAllFiles(args []string) int {
+	total := 0
 	for _, fname := range args {
-		missingDates := searchOneFile(fname)
-		for i,d := range missingDates {
-			fmt.Printf("[%d] missing: %s\n", i+1, d.Format(dateOutputFmt))
+		missingDates, csvStyleDate := searchOneFile(fname)
+		for _,d := range missingDates {
+			missingFormatted := shared.ConvertDate(d.ToTime(), csvStyleDate)
+			fmt.Println(missingFormatted)
 		}
+		total += len(missingDates)
 	}
+	return total
 }
 
-func searchOneFile(fname string) []goment.Goment {
+func searchOneFile(fname string) ([]goment.Goment, string) {
 	debugLevel := allRootOptions.Debug
-	fileOps.CsvOpenRead(fname)
+	// why? fileOps.CsvOpenRead(fname)
 	input, file := fileOps.CsvOpenRead(fname)
 	var r []rune
 	if allRootOptions.CsvDelimiter == `\t` {
@@ -66,7 +72,7 @@ func searchOneFile(fname string) []goment.Goment {
 		r = []rune(allRootOptions.CsvDelimiter)
 	}
 	input.Comma = r[0]
-	csvDates, requiredDates := getCsvAndRequiredDates(input, fname)
+	csvDates, requiredDates, csvStyleDate := getCsvAndRequiredDates(input, fname)
 	file.Close()
 
 	if debugLevel > 98 {
@@ -86,7 +92,7 @@ func searchOneFile(fname string) []goment.Goment {
 		}
 	}
 
-	return findMissingDates(csvDates, requiredDates)
+	return findMissingDates(csvDates, requiredDates), csvStyleDate
 }
 
 func isSameOrBefore(csvDate, reqDate goment.Goment) bool {
@@ -183,7 +189,7 @@ func getCsvDates(allRecords [][]string) ([]goment.Goment, map[string][]string) {
 	return csvDates, allRows
 }
 
-func getCsvAndRequiredDates(input *csv.Reader, streamName string) ([]goment.Goment, []goment.Goment) {
+func getCsvAndRequiredDates(input *csv.Reader, streamName string) ([]goment.Goment, []goment.Goment, string) {
 	allRecords, err := input.ReadAll()
 	if err != nil {
 		log.Fatalf("Error #89533: Unable to read from stream: '%s'; %s\n", streamName, err)
@@ -213,6 +219,9 @@ func getCsvAndRequiredDates(input *csv.Reader, streamName string) ([]goment.Gome
 		log.Fatalf("Error #30435: Invalid data/time: '%s'; %s\n", lastRec[allRootOptions.Column], err)
 	}
 
+	layout := firstRec[allRootOptions.Column]
+	csvStyleDate := shared.ConvertDate(first.ToTime(), layout)
+
 	var requiredDates []goment.Goment
 	durationInSeconds := shared.GetDurationInSeconds(allRootOptions.Amount, allRootOptions.Period)
 	current, _ := goment.New(first)
@@ -225,5 +234,5 @@ func getCsvAndRequiredDates(input *csv.Reader, streamName string) ([]goment.Gome
 	}
 	requiredDates = append(requiredDates, *current)
 
-	return csvDates, requiredDates
+	return csvDates, requiredDates, csvStyleDate
 }

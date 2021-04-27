@@ -66,6 +66,7 @@ func insertAllFiles(args []string) {
 		}
 		if allInsertOptions.Overwrite {
 			fileOps.OverwriteCsv(fname, augmentedData)
+			continue
 		}
 		for _, aug := range augmentedData {
 			fmt.Println(aug)
@@ -75,7 +76,7 @@ func insertAllFiles(args []string) {
 
 func insertOneFile(fname string) []string {
 	debug := allRootOptions.Debug
-	allMissingDates := searchOneFile(fname)
+	allMissingDates, _ := searchOneFile(fname)
 	if len(allMissingDates) == 0 {
 		return nil
 	}
