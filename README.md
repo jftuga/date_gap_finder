@@ -41,7 +41,47 @@ Use "date_gap_finder [command] --help" for more information about a command.
 
 ```
 
-## Examples
+## Example: Search For Missing Dates
+
+This example file is called `e.csv`, which *should* get updated once per day.
+
+| Date | Errors | Warnings
+|------|--------|----------
+| 2021-04-15 06:55:01 | 0 | 23
+| 2021-04-15 08:30:26 | 1 | 22
+| 2021-04-16 06:55:01 | 0 | 23
+| 2021-04-19 06:55:01 | 2 | 21
+
+```
+# I usually allow for a couple of extra minutes in case a process runs a little longer than usual. Therefore, 1442 instead of 1440.
+$ date_gap_finder search -a 1442 -p minutes e.csv
+2021-04-17 06:59:01
+2021-04-18 07:01:01
+# For the search verb, the program's exit code will be equal to the number of missed dates
+# For Powershell, use $LASTEXITCODE
+$ echo $?
+2
+
+# Skip weekends with -s
+$ date_gap_finder search -a 1442 -p -s minutes e.csv
+(no output - as all missed dates occurs on either a Saturday or Sunday)
+
+# This also skips weekends, but you could also include other days of the week
+$ date_gap_finder search -a 1442 -p -S Saturday,Sunday minutes e.csv
+(no output - as all missed dates occurs on either a Saturday or Sunday)
+
+```
+
+## Example: Insert Records For Missing Dates
+
+```
+TO DO
+
+```
+
+
+___
+
 
 ## License
 * [MIT License](LICENSE)
