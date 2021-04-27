@@ -26,15 +26,16 @@ Available Commands:
   search      search CSV files for missing dates
 
 Flags:
-  -a, --amount int        a maximum, numeric duration (default -1)
-  -c, --column int        CSV column number (starts at zero)
-  -D, --debug int         enable verbose debugging, set to 999 or 9999
-  -H, --header            if CSV file has header line (default true)
-  -h, --help              help for date_gap_finder
-  -p, --period string     period of time, such as: days, hours, minutes
-  -S, --skipDays string   skip comma-delimited set of fully spelled out days
-  -s, --skipWeekends      allow gaps on weekends when set
-  -v, --version           version for date_gap_finder
+  -a, --amount int         a maximum, numeric duration (default -1)
+  -c, --column int         CSV column number (starts at zero)
+  -D, --debug int          enable verbose debugging, set to 999 or 9999
+  -d, --delimiter string   CSV delimiter (default ",")
+  -H, --header             if CSV file has header line (default true)
+  -h, --help               help for date_gap_finder
+  -p, --period string      period of time, such as: days, hours, minutes
+  -S, --skipDays string    skip comma-delimited set of fully spelled out days
+  -s, --skipWeekends       allow gaps on weekends when set
+  -v, --version            version for date_gap_finder
 
 Use "date_gap_finder [command] --help" for more information about a command.
 
