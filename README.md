@@ -1,16 +1,18 @@
 # date_gap_finder
 
-**WORK IN PROGRESS**
-
 ## Description
-Searches for missing dates with in CSV files and optionally insert new CSV entries for those missing dates
+`date_gap_finder` searches for missing dates with in CSV files and optionally inserts new CSV entries for those missing dates.
 
 ## Motivation
-I have many automated tasks that will add data to CSV files (one per task) each day.  However, if for some reason that 
-task does not run, there is a possibility that I will not be notified.  Each of these CSV tasks are monitored via a 
+I have many automated tasks that will append data to individual CSV files once per day.  However, if for some reason that 
+task does not start, there is a possibility that I will not be notified of any possible errors.  Each of these tasks are monitored via a 
 Grafana dashboard using the [grafana-csv-datasource](https://github.com/marcusolsson/grafana-csv-datasource) data source
 plugin.  This allows me to quickly view the status of all automated tasks.  When a task has missed a day, then this 
 program will insert CSV data in such a way that I will be notified that a task was not run.
+
+This image display the before and after of using `date_gap_finder`.  The **Photo Import** job runs every weekday.  Notice that `Monday, April 26` is missing from the *Before* image on the left.  This could be easily missed since it occurrs on a Monday and this it isn't run on the weekends.  The *After* image on the right shows what can be displayed when using `date_gap_finder` to insert missing CSV data.  It is now much easier to detect a date gap.
+
+![Grafana Before and After](dgf_before_after.png)
 
 ## Usage
 ```
@@ -41,6 +43,8 @@ Use "date_gap_finder [command] --help" for more information about a command.
 
 ```
 
+
+___
 ## Example: Search For Missing Dates
 
 This example file is called `e.csv`, which *should* get updated once per day.
@@ -51,6 +55,7 @@ This example file is called `e.csv`, which *should* get updated once per day.
 | 2021-04-15 08:30:26 | 1 | 22
 | 2021-04-16 06:55:01 | 0 | 23
 | 2021-04-19 06:55:01 | 2 | 21
+
 
 ```
 # I usually allow for a couple of extra minutes in case a process runs a little longer than usual. Therefore, 1442 instead of 1440.
