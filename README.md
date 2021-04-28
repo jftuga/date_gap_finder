@@ -88,7 +88,7 @@ $ date_gap_finder search -a 1442 -p -S Saturday,Sunday minutes e.csv
 ```
 
 # Columns numbers start at zero.
-# Insert -1 at column 1 and 1 at column 2
+# Insert -1 at column 1 and 0 at column 2
 
 PS C:\> .\date_gap_finder.exe insert -a 1442 -p minutes -r 1,-1 -r 2,0 .\e.csv
 Date,Errors,Warnings
