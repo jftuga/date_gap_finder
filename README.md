@@ -3,6 +3,8 @@
 ## Description
 `date_gap_finder` searches for missing dates with in CSV files and optionally inserts new CSV entries for those missing dates.
 
+Binaries for Windows, Mac, and Linux are available on the [releases](https://github.com/jftuga/date_gap_finder/releases) page.
+
 ## Motivation
 I have many automated tasks that will append data to individual CSV files once per day.  However, if for some reason that 
 task does not start, there is a possibility that I will not be notified of any possible errors.  Each of these tasks are monitored via a 
