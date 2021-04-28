@@ -48,7 +48,7 @@ var allRootOptions rootOptions
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "date_gap_finder",
-	Short: "searches for missing dates with in CSV files and optionally insert CSV entries for those missing dates",
+	Short: "date_gap_finder searches for missing dates with in CSV files and optionally inserts CSV entries for those missing dates.",
 	Version: pgmVersion,
 }
 

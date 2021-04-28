@@ -16,7 +16,7 @@ This image display the before and after of using `date_gap_finder`.  The **Photo
 
 ## Usage
 ```
-searches for missing dates with in CSV files and optionally insert CSV entries for those missing dates
+date_gap_finder searches for missing dates with in CSV files and optionally inserts CSV entries for those missing dates.
 
 Usage:
   date_gap_finder [command]
@@ -24,7 +24,6 @@ Usage:
 Available Commands:
   help        Help about any command
   insert      insert missing CSV entries
-  replace     A brief description of your command
   search      search CSV files for missing dates
 
 Flags:
@@ -41,10 +40,16 @@ Flags:
 
 Use "date_gap_finder [command] --help" for more information about a command.
 
+
+Flags for "insert":
+  -R, --allRecords string    insert data to all columns of a missing row
+  -O, --overwrite            overwrite existing CSV file; original file saved as .bak
+  -r, --record stringArray   insert record with missing data
+
 ```
 
-
 ___
+
 ## Example: Search For Missing Dates
 
 This example file is called `e.csv`, which *should* get updated once per day.
