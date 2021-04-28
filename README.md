@@ -70,17 +70,16 @@ $ date_gap_finder search -a 1442 -p minutes e.csv
 2021-04-17 06:59:01
 2021-04-18 07:01:01
 
-# For the search verb, the program's exit code will be equal to the number of missed dates
-# For Powershell, use $LASTEXITCODE
+# For the search verb, the program's exit code will be equal to the number of missed dates. For Powershell, use $LASTEXITCODE
 $ echo $?
 2
 
 # Skip weekends with -s
-$ date_gap_finder search -a 1442 -p -s minutes e.csv
+$ date_gap_finder search -a 1442 -p minutes -s e.csv
 (no output - as all missed dates occurs on either a Saturday or Sunday)
 
 # This also skips weekends, but you could also include other days of the week
-$ date_gap_finder search -a 1442 -p -S Saturday,Sunday minutes e.csv
+$ date_gap_finder search -a 1442 -p minutes -S Saturday,Sunday minutes e.csv
 (no output - as all missed dates occurs on either a Saturday or Sunday)
 
 ```
@@ -90,8 +89,8 @@ $ date_gap_finder search -a 1442 -p -S Saturday,Sunday minutes e.csv
 ```
 
 # Columns numbers start at zero.
-# Insert -1 at column 1 and 0 at column 2
-
+# Use multiple -r options to insert data in deifferent columns.
+# Insert a -1 value in column 1; insert a 0 value in column 2
 PS C:\> .\date_gap_finder.exe insert -a 1442 -p minutes -r 1,-1 -r 2,0 .\e.csv
 Date,Errors,Warnings
 2021-04-15 06:55:01,0,23
