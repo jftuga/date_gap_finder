@@ -57,6 +57,7 @@ This example file is called `e.csv`, which *should* get updated once per day.
 $ date_gap_finder search -a 1442 -p minutes e.csv
 2021-04-17 06:59:01
 2021-04-18 07:01:01
+
 # For the search verb, the program's exit code will be equal to the number of missed dates
 # For Powershell, use $LASTEXITCODE
 $ echo $?
@@ -75,10 +76,29 @@ $ date_gap_finder search -a 1442 -p -S Saturday,Sunday minutes e.csv
 ## Example: Insert Records For Missing Dates
 
 ```
-TO DO
+
+# Columns numbers start at zero.
+# Insert -1 at column 1 and 1 at column 2
+
+PS C:\> .\date_gap_finder.exe insert -a 1442 -p minutes -r 1,-1 -r 2,0 .\e.csv
+Date,Errors,Warnings
+2021-04-15 06:55:01,0,23
+2021-04-15 08:30:26,0,23
+2021-04-16 06:55:01,0,23
+2021-04-17 06:59:01,-1,0
+2021-04-18 07:01:01,-1,0
+2021-04-19 06:55:01,0,23
+
+# Use -R to set all missing columns and also skip Sundays
+PS C:\> .\date_gap_finder.exe insert -a 1442 -p minutes -R 999 -S Sunday .\e.csv
+Date,Errors,Warnings
+2021-04-15 06:55:01,0,23
+2021-04-15 08:30:26,0,23
+2021-04-16 06:55:01,0,23
+2021-04-17 06:59:01,999,999
+2021-04-19 06:55:01,0,23
 
 ```
-
 
 ___
 
