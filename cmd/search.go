@@ -39,6 +39,7 @@ var searchCmd = &cobra.Command{
 	Long: `CSV dates are assumed to be sorted from oldest to newest within the file.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		//p := profile.Start(profile.CPUProfile, profile.ProfilePath("."))
+		//p := profile.Start(profile.MemProfile, profile.MemProfileRate(512), profile.ProfilePath("."))
 		total := searchAllFiles(args)
 		//p.Stop()
 		os.Exit(total)
@@ -64,7 +65,6 @@ func searchAllFiles(args []string) int {
 
 func SearchOneFile(fname string) ([]goment.Goment, string) {
 	debugLevel := allRootOptions.Debug
-	// why? fileOps.CsvOpenRead(fname)
 	input, file := fileOps.CsvOpenRead(fname)
 	var r []rune
 	if allRootOptions.CsvDelimiter == `\t` {
