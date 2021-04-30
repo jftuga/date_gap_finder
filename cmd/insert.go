@@ -24,7 +24,6 @@ package cmd
 import (
 	"fmt"
 	"github.com/jftuga/date_gap_finder/fileOps"
-	"github.com/jftuga/date_gap_finder/shared"
 	"github.com/spf13/cobra"
 	"log"
 	"sort"
@@ -118,7 +117,7 @@ func insertOneFile(fname string) []string {
 	}
 
 	for _, m := range allMissingDates {
-		csvStyleDate := shared.ConvertDate(m.ToTime(), layout)
+		csvStyleDate := ConvertDate(m.ToTime(), layout)
 		newRow := createNewRow(csvStyleDate, numOfColumns)
 		allRecords = append(allRecords, newRow)
 	}
@@ -192,13 +191,13 @@ func createNewRow(missedDate string, numOfColumns int) []string {
 		if debug > 9998 {
 			fmt.Println("kv:",column)
 		}
-		col, val := shared.GetKeyVal(column)
+		col, val := GetKeyVal(column)
 		missingRecord[col] = val
 	}
 	if debug > 9998 {
 		fmt.Println("missingRecord:", missingRecord)
 	}
-	keys, last := shared.SortIntMapByKey(missingRecord)
+	keys, last := SortIntMapByKey(missingRecord)
 	if debug > 9998 {
 		fmt.Println("keys, last:", keys, last)
 	}

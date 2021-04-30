@@ -25,7 +25,6 @@ import (
 	"encoding/csv"
 	"fmt"
 	"github.com/jftuga/date_gap_finder/fileOps"
-	"github.com/jftuga/date_gap_finder/shared"
 	"github.com/nleeper/goment"
 	"github.com/spf13/cobra"
 	"log"
@@ -53,7 +52,7 @@ func searchAllFiles(args []string) int {
 	for _, fname := range args {
 		missingDates, csvStyleDate := SearchOneFile(fname)
 		for _,d := range missingDates {
-			missingFormatted := shared.ConvertDate(d.ToTime(), csvStyleDate)
+			missingFormatted := ConvertDate(d.ToTime(), csvStyleDate)
 			fmt.Println(missingFormatted)
 		}
 		total += len(missingDates)
@@ -102,14 +101,14 @@ func isSameOrBefore(csvDate, reqDate goment.Goment) bool {
 func findMissingDates(csvDates, requiredDates []goment.Goment) []goment.Goment {
 	debugLevel := allRootOptions.Debug
 
-	maxTimeDiff := shared.GetDuration(allRootOptions.Amount, allRootOptions.Period)
+	maxTimeDiff := GetDuration(allRootOptions.Amount, allRootOptions.Period)
 	seenDates := make(map [string]bool)
 	for _, reqDate := range requiredDates {
 		for _, csvDate := range csvDates {
 			if isSameOrBefore(csvDate, reqDate) {
 				key := reqDate.Format(dateOutputFmt)
 				// compare the time duration difference
-				diff := shared.GetTimeDifference(csvDate,reqDate)
+				diff := GetTimeDifference(csvDate,reqDate)
 				if diff.Seconds() < maxTimeDiff.Seconds() {
 					seenDates[key] = true
 				}
@@ -220,10 +219,10 @@ func getCsvAndRequiredDates(input *csv.Reader, streamName string) ([]goment.Gome
 	}
 
 	layout := firstRec[allRootOptions.Column]
-	csvStyleDate := shared.ConvertDate(first.ToTime(), layout)
+	csvStyleDate := ConvertDate(first.ToTime(), layout)
 
 	var requiredDates []goment.Goment
-	durationInSeconds := shared.GetDurationInSeconds(allRootOptions.Amount, allRootOptions.Period)
+	durationInSeconds := GetDurationInSeconds(allRootOptions.Amount, allRootOptions.Period)
 	current, _ := goment.New(first)
 	for {
 		if current.IsAfter(last) {
