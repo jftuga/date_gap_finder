@@ -76,7 +76,7 @@ func insertAllFiles(args []string) {
 
 func insertOneFile(fname string) []string {
 	debug := allRootOptions.Debug
-	allMissingDates, _ := searchOneFile(fname)
+	allMissingDates, _ := SearchOneFile(fname)
 	if len(allMissingDates) == 0 {
 		return nil
 	}

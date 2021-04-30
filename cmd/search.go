@@ -51,7 +51,7 @@ func init() {
 func searchAllFiles(args []string) int {
 	total := 0
 	for _, fname := range args {
-		missingDates, csvStyleDate := searchOneFile(fname)
+		missingDates, csvStyleDate := SearchOneFile(fname)
 		for _,d := range missingDates {
 			missingFormatted := shared.ConvertDate(d.ToTime(), csvStyleDate)
 			fmt.Println(missingFormatted)
@@ -61,7 +61,7 @@ func searchAllFiles(args []string) int {
 	return total
 }
 
-func searchOneFile(fname string) ([]goment.Goment, string) {
+func SearchOneFile(fname string) ([]goment.Goment, string) {
 	debugLevel := allRootOptions.Debug
 	// why? fileOps.CsvOpenRead(fname)
 	input, file := fileOps.CsvOpenRead(fname)
