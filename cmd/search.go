@@ -231,7 +231,9 @@ func getCsvAndRequiredDates(input *csv.Reader, streamName string) ([]goment.Gome
 		requiredDates = append(requiredDates, *current)
 		current.Add(durationInSeconds, "seconds")
 	}
-	requiredDates = append(requiredDates, *current)
+	if current.IsBetween(&last) {
+		requiredDates = append(requiredDates, *current)
+	}
 
 	return csvDates, requiredDates, csvStyleDate
 }

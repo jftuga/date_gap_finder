@@ -162,9 +162,8 @@ func TestSearch6(t *testing.T) {
 
 	missingDates, csvStyleDate := SearchOneFile(fname)
 	iss := is.New(t)
-	iss.Equal(len(missingDates), 2)
+	iss.Equal(len(missingDates), 1)
 	iss.Equal(missingDates[0].ToTime().String(), "2021-04-20 06:55:01 +0000 UTC")
-	iss.Equal(missingDates[1].ToTime().String(), "2021-04-23 06:55:01 +0000 UTC") // FIXME: this should not be returned
 	iss.Equal(csvStyleDate, "2021-04-13 06:55:01")
 }
 
