@@ -119,7 +119,8 @@ func findMissingDates(csvDates, requiredDates []goment.Goment) []goment.Goment {
 		fmt.Println("seenDates")
 		fmt.Println("============")
 		for key := range seenDates {
-			fmt.Println(key)
+			g, _ := goment.Unix(key)
+			fmt.Println(g.Format(dateOutputFmt))
 		}
 	}
 
