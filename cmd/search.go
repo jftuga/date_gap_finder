@@ -96,10 +96,6 @@ func SearchOneFile(fname string) ([]goment.Goment, string) {
 	return findMissingDates(csvDates, requiredDates), csvStyleDate
 }
 
-func isSameOrBefore(csvDate, reqDate goment.Goment) bool {
-	return csvDate.IsSameOrBefore(&reqDate)
-}
-
 func findMissingDates(csvDates, requiredDates []goment.Goment) []goment.Goment {
 	debugLevel := allRootOptions.Debug
 
@@ -107,7 +103,7 @@ func findMissingDates(csvDates, requiredDates []goment.Goment) []goment.Goment {
 	seenDates := make(map [int64]bool)
 	for _, reqDate := range requiredDates {
 		for _, csvDate := range csvDates {
-			if isSameOrBefore(csvDate, reqDate) {
+			if csvDate.IsSameOrBefore(&reqDate) {
 				key := reqDate.ToUnix()
 				// compare the time duration difference
 				diff := GetTimeDifference(csvDate,reqDate)
