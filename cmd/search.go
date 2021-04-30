@@ -114,7 +114,6 @@ func findMissingDates(csvDates, requiredDates []goment.Goment) []goment.Goment {
 				if diff.Seconds() < maxTimeDiff.Seconds() {
 					seenDates[key] = true
 				}
-
 			}
 		}
 	}
