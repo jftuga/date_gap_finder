@@ -161,8 +161,6 @@ func TestSearch6(t *testing.T) {
 	allRootOptions.SkipDays = "Wednesday,Thursday"
 
 	missingDates, csvStyleDate := SearchOneFile(fname)
-	debug(missingDates, csvStyleDate)
-
 	iss := is.New(t)
 	iss.Equal(len(missingDates), 2)
 	iss.Equal(missingDates[0].ToTime().String(), "2021-04-20 06:55:01 +0000 UTC")
