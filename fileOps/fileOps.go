@@ -1,5 +1,8 @@
 package fileOps
 
+// CSV functions such as opening, reading, writing
+// Filename splitting, file renaming
+
 import (
 	"bufio"
 	"bytes"
@@ -41,21 +44,6 @@ func SaveToCsv(fname string, data [][]string) {
 	w.WriteAll(data)
 }
 
-// SplitFilename return the filename without extension and the extension (with leading dot)
-func SplitFilename(fileName string) (string, string) {
-	return strings.TrimSuffix(fileName, filepath.Ext(fileName)), filepath.Ext(fileName)
-}
-
-// RenameFile rename a file; expects full path name for both args
-func RenameFile(oldPath, newPath string) bool {
-	err := os.Rename(oldPath, newPath)
-	if err != nil {
-		log.Fatalf("Error #20050: Unable to rename file from '%s' to '%s'; %s\n", oldPath, newPath, err)
-		return false
-	}
-	return true
-}
-
 // OverwriteCsv a CSV file with new data; also create a backup file with date and .bak extension
 func OverwriteCsv(fname string, data []string) bool {
 	base, _ :=  SplitFilename(fname)
@@ -86,6 +74,21 @@ func OverwriteCsv(fname string, data []string) bool {
 	err = file.Close()
 	if err != nil {
 		log.Fatalf("Error #20065: Unable to close CSV file: '%s'; %s\n", fname, err)
+		return false
+	}
+	return true
+}
+
+// SplitFilename return the filename without extension and the extension (with leading dot)
+func SplitFilename(fileName string) (string, string) {
+	return strings.TrimSuffix(fileName, filepath.Ext(fileName)), filepath.Ext(fileName)
+}
+
+// RenameFile rename a file; expects full path name for both args
+func RenameFile(oldPath, newPath string) bool {
+	err := os.Rename(oldPath, newPath)
+	if err != nil {
+		log.Fatalf("Error #20050: Unable to rename file from '%s' to '%s'; %s\n", oldPath, newPath, err)
 		return false
 	}
 	return true
