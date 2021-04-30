@@ -21,7 +21,9 @@ THE SOFTWARE.
 */
 package main
 
-import "github.com/jftuga/date_gap_finder/cmd"
+import (
+	"github.com/jftuga/date_gap_finder/cmd"
+)
 
 func main() {
 	cmd.Execute()

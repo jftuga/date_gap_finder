@@ -38,7 +38,9 @@ var searchCmd = &cobra.Command{
 	Short: "search CSV files for missing dates",
 	Long: `CSV dates are assumed to be sorted from oldest to newest within the file.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		//p := profile.Start(profile.CPUProfile, profile.ProfilePath("."))
 		total := searchAllFiles(args)
+		//p.Stop()
 		os.Exit(total)
 	},
 }
@@ -102,11 +104,11 @@ func findMissingDates(csvDates, requiredDates []goment.Goment) []goment.Goment {
 	debugLevel := allRootOptions.Debug
 
 	maxTimeDiff := GetDuration(allRootOptions.Amount, allRootOptions.Period)
-	seenDates := make(map [string]bool)
+	seenDates := make(map [int64]bool)
 	for _, reqDate := range requiredDates {
 		for _, csvDate := range csvDates {
 			if isSameOrBefore(csvDate, reqDate) {
-				key := reqDate.Format(dateOutputFmt)
+				key := reqDate.ToUnix()
 				// compare the time duration difference
 				diff := GetTimeDifference(csvDate,reqDate)
 				if diff.Seconds() < maxTimeDiff.Seconds() {
@@ -138,7 +140,7 @@ func findMissingDates(csvDates, requiredDates []goment.Goment) []goment.Goment {
 	}
 	var allMissingDates []goment.Goment
 	for _, reqDate := range requiredDates {
-		toCheck := reqDate.Format(dateOutputFmt)
+		toCheck := reqDate.ToUnix()
 		if allRootOptions.SkipWeekends && (reqDate.Format("dddd") == "Saturday" || reqDate.Format("dddd") == "Sunday") {
 			if debugLevel > 98 {
 				fmt.Println("skipping weekend:", reqDate.Format(dateOutputFmt))
@@ -156,7 +158,8 @@ func findMissingDates(csvDates, requiredDates []goment.Goment) []goment.Goment {
 		if !ok {
 			allMissingDates = append(allMissingDates, reqDate)
 			if debugLevel > 98 {
-				fmt.Printf("missing date: %s\n", toCheck)
+				g, _ := goment.Unix(toCheck)
+				fmt.Printf("missing date: %s\n", g.Format(dateOutputFmt))
 			}
 		}
 	}
