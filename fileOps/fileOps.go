@@ -45,7 +45,7 @@ func SaveToCsv(fname string, data [][]string) {
 }
 
 // OverwriteCsv a CSV file with new data; also create a backup file with date and .bak extension
-func OverwriteCsv(fname string, data []string) bool {
+func OverwriteCsv(fname string, data []string) (bool, string) {
 	base, _ :=  SplitFilename(fname)
 	t := time.Now()
 	now := t.Format("20060102.150405")
@@ -54,29 +54,29 @@ func OverwriteCsv(fname string, data []string) bool {
 	err := filecopy.Copy(newFilename, fname)
 	if err != nil {
 		log.Fatalf("Error #20053: Unable to copy file from '%s' to '%s'; %s\n", fname, newFilename, err)
-		return false
+		return false, ""
 	}
 
 	file, err := os.Create(fname)
 	if err != nil {
 		log.Fatalf("Error #20055: Unable to open file for writing: '%s'; %s\n", fname, err)
-		return false
+		return false, ""
 	}
 	w := bufio.NewWriter(file)
 	for _, row := range data {
 		_, err = w.WriteString(row + "\n")
 		if err != nil {
 			log.Fatalf("Error #20060: Unable to write CSV data to file: '%s'; %s\n", fname, err)
-			return false
+			return false, ""
 		}
 	}
 	w.Flush()
 	err = file.Close()
 	if err != nil {
 		log.Fatalf("Error #20065: Unable to close CSV file: '%s'; %s\n", fname, err)
-		return false
+		return false, ""
 	}
-	return true
+	return true, newFilename
 }
 
 // SplitFilename return the filename without extension and the extension (with leading dot)
