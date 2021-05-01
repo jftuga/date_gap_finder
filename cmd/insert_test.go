@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"github.com/jftuga/date_gap_finder/fileOps"
 	"github.com/matryer/is"
+	"log"
+	"os"
 	"testing"
 )
 
@@ -103,6 +105,13 @@ func TestInsert4(t *testing.T) {
 	data := "Date,Amount\n2021-04-01 18:40:00,318\n2021-04-02 18:40:00,252\n2021-04-06 18:40:00,291\n2021-04-07 18:40:00,274\n2021-04-08 18:40:01,243"
 	CreateCSVFile(fname, data)
 
+	var err error
+	var origCsvStat, bakCsvStat os.FileInfo
+	origCsvStat, err = os.Stat(fname)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
 	allRootOptions.Amount = 25
 	allRootOptions.Period = "hours"
 	allRootOptions.Column = 0
@@ -125,9 +134,19 @@ func TestInsert4(t *testing.T) {
 	iss.Equal(csv[5], "2021-04-07 18:40:00,274")
 	iss.Equal(csv[6], "2021-04-08 18:40:01,243")
 
-	if allInsertOptions.Overwrite {
-		fileOps.OverwriteCsv(fname, csv)
+	if ! allInsertOptions.Overwrite {
+		return
 	}
+
+	result, _ := fileOps.OverwriteCsv(fname, csv)
+	iss.True(result)
+
+	bakCsvStat, err = os.Stat(fname)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	//fmt.Println("o:", origCsvStat.Size(), "  b:", bakCsvStat.Size())
+	iss.True(origCsvStat.Size() < bakCsvStat.Size() )
 }
 
 // TestInsert5 - same a 4 but with no header, 1 missing date, overwrite file
@@ -135,6 +154,13 @@ func TestInsert5(t *testing.T) {
 	fname := "TestInsert5.csv"
 	data := "2021-04-01 18:40:00,318\n2021-04-02 18:40:00,252\n2021-04-06 18:40:00,291\n2021-04-07 18:40:00,274\n2021-04-08 18:40:01,243"
 	CreateCSVFile(fname, data)
+
+	var err error
+	var origCsvStat, bakCsvStat os.FileInfo
+	origCsvStat, err = os.Stat(fname)
+	if err != nil {
+		log.Fatalln(err)
+	}
 
 	allRootOptions.Amount = 25
 	allRootOptions.Period = "hours"
@@ -157,7 +183,17 @@ func TestInsert5(t *testing.T) {
 	iss.Equal(csv[4], "2021-04-07 18:40:00,274")
 	iss.Equal(csv[5], "2021-04-08 18:40:01,243")
 
-	if allInsertOptions.Overwrite {
-		fileOps.OverwriteCsv(fname, csv)
+	if ! allInsertOptions.Overwrite {
+		return
 	}
+
+	result, _ := fileOps.OverwriteCsv(fname, csv)
+	iss.True(result)
+
+	bakCsvStat, err = os.Stat(fname)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	//fmt.Println("o:", origCsvStat.Size(), "  b:", bakCsvStat.Size())
+	iss.True(origCsvStat.Size() < bakCsvStat.Size() )
 }
