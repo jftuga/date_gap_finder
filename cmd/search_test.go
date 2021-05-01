@@ -43,6 +43,9 @@ func TestSearch1(t *testing.T) {
 	allRootOptions.Amount = 1442
 	allRootOptions.Period = "minutes"
 	allRootOptions.Column = 0
+	allRootOptions.CsvDelimiter = ","
+	allRootOptions.SkipWeekends = false
+	allRootOptions.HasHeader = true
 
 	missingDates, csvStyleDate := SearchOneFile(fname)
 	iss := is.New(t)
