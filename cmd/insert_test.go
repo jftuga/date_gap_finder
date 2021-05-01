@@ -9,8 +9,6 @@ import (
 	"testing"
 )
 
-// TODO: test -O switch and ensure backup files exist
-
 func debugArr(allRows []string) {
 	fmt.Println()
 	fmt.Println("csv records")
