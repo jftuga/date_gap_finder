@@ -35,13 +35,11 @@ Flags:
   -d, --delimiter string   CSV delimiter (default ",")
   -H, --header             if CSV file has header line (default true)
   -h, --help               help for date_gap_finder
-  -p, --period string      period of time, such as: days, hours, minutes
+  -p, --padding string     add time to range before considering a gap between two dates
   -S, --skipDays string    skip comma-delimited set of fully spelled out days
   -s, --skipWeekends       allow gaps on weekends when set
+  -u, --unit string        unit of time, such as: days, hours, minutes
   -v, --version            version for date_gap_finder
-
-Use "date_gap_finder [command] --help" for more information about a command.
-
 
 Flags for "insert":
   -R, --allRecords string    insert data to all columns of a missing row
@@ -66,7 +64,7 @@ This example file is called `e.csv`, which *should* get updated once per day.
 
 ```
 # I usually allow for a couple of extra minutes in case a process runs a little longer than usual. Therefore, 1442 instead of 1440.
-$ date_gap_finder search -a 1442 -p minutes e.csv
+$ date_gap_finder search -a 1442 -u minutes e.csv
 2021-04-17 06:59:01
 2021-04-18 07:01:01
 
@@ -75,11 +73,11 @@ $ echo $?
 2
 
 # Skip weekends with -s
-$ date_gap_finder search -a 1442 -p minutes -s e.csv
+$ date_gap_finder search -a 1442 -u minutes -s e.csv
 (no output - as all missed dates occurs on either a Saturday or Sunday)
 
 # This also skips weekends, but you could also include other days of the week
-$ date_gap_finder search -a 1442 -p minutes -S Saturday,Sunday minutes e.csv
+$ date_gap_finder search -a 1442 -u minutes -S Saturday,Sunday minutes e.csv
 (no output - as all missed dates occurs on either a Saturday or Sunday)
 
 ```
@@ -91,7 +89,7 @@ $ date_gap_finder search -a 1442 -p minutes -S Saturday,Sunday minutes e.csv
 # Columns numbers start at zero.
 # Use multiple -r options to insert data in deifferent columns.
 # Insert a -1 value in column 1; insert a 0 value in column 2
-PS C:\> .\date_gap_finder.exe insert -a 1442 -p minutes -r 1,-1 -r 2,0 .\e.csv
+PS C:\> .\date_gap_finder.exe insert -a 1442 -u minutes -r 1,-1 -r 2,0 .\e.csv
 Date,Errors,Warnings
 2021-04-15 06:55:01,0,23
 2021-04-15 08:30:26,0,23
@@ -101,7 +99,7 @@ Date,Errors,Warnings
 2021-04-19 06:55:01,0,23
 
 # Use -R to set all missing columns and also skip Sundays
-PS C:\> .\date_gap_finder.exe insert -a 1442 -p minutes -R 999 -S Sunday .\e.csv
+PS C:\> .\date_gap_finder.exe insert -a 1442 -u minutes -R 999 -S Sunday .\e.csv
 Date,Errors,Warnings
 2021-04-15 06:55:01,0,23
 2021-04-15 08:30:26,0,23

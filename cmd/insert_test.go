@@ -25,7 +25,7 @@ func TestInsert1(t *testing.T) {
 	CreateCSVFile(fname, data)
 
 	allRootOptions.Amount = 1442
-	allRootOptions.Period = "minutes"
+	allRootOptions.Unit = "minutes"
 	allRootOptions.Column = 0
 
 	allInsertOptions.columnInserts = []string {"1,-1", "2,999"}
@@ -49,7 +49,7 @@ func TestInsert2(t *testing.T) {
 	CreateCSVFile(fname, data)
 
 	allRootOptions.Amount = 1
-	allRootOptions.Period = "days"
+	allRootOptions.Unit = "days"
 	allRootOptions.Column = 1
 
 	allInsertOptions.columnInserts = []string {}
@@ -76,7 +76,7 @@ func TestInsert3(t *testing.T) {
 	CreateCSVFile(fname, data)
 
 	allRootOptions.Amount = 1442
-	allRootOptions.Period = "minutes"
+	allRootOptions.Unit = "minutes"
 	allRootOptions.Column = 0
 	allRootOptions.CsvDelimiter = ","
 	allRootOptions.SkipWeekends = false
@@ -111,7 +111,7 @@ func TestInsert4(t *testing.T) {
 	}
 
 	allRootOptions.Amount = 25
-	allRootOptions.Period = "hours"
+	allRootOptions.Unit = "hours"
 	allRootOptions.Column = 0
 	allRootOptions.CsvDelimiter = ","
 	allRootOptions.SkipWeekends = true
@@ -161,7 +161,7 @@ func TestInsert5(t *testing.T) {
 	}
 
 	allRootOptions.Amount = 25
-	allRootOptions.Period = "hours"
+	allRootOptions.Unit = "hours"
 	allRootOptions.Column = 0
 	allRootOptions.CsvDelimiter = ","
 	allRootOptions.SkipWeekends = true

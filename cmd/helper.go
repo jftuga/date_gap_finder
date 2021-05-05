@@ -4,6 +4,7 @@ package cmd
 
 
 import (
+	"github.com/nleeper/goment"
 	"log"
 	"sort"
 	"strconv"
@@ -39,4 +40,28 @@ func SortIntMapByKey(m map[int]string) ([]int,int) {
 	}
 	sort.Ints(keys)
 	return keys, largest
+}
+
+// RemoveSliceItem - Remove an item from a slice
+func RemoveSliceItem(s []goment.Goment, rm int) []goment.Goment {
+	var result []goment.Goment
+	for i := range s {
+		if i == rm {
+			continue
+		}
+		result = append(result,s[i])
+	}
+	return result
+}
+
+// BeheadSlice - remove items from the beginning of a slice
+func BeheadSlice(s []goment.Goment, rm int) []goment.Goment {
+	var result []goment.Goment
+	for i := range s {
+		if i <= rm {
+			continue
+		}
+		result = append(result,s[i])
+	}
+	return result
 }

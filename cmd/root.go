@@ -36,7 +36,8 @@ type rootOptions struct {
 	Column int
 	HasHeader bool
 	Amount int
-	Period string
+	Unit string
+	Padding string
 	SkipWeekends bool
 	SkipDays string
 	CsvDelimiter string
@@ -66,7 +67,8 @@ func init() {
 	rootCmd.PersistentFlags().IntVarP(&allRootOptions.Column, "column", "c", 0, "CSV column number (starts at zero)")
 	rootCmd.PersistentFlags().BoolVarP(&allRootOptions.HasHeader, "header", "H", true, "if CSV file has header line")
 	rootCmd.PersistentFlags().IntVarP(&allRootOptions.Amount, "amount", "a", -1, "a maximum, numeric duration")
-	rootCmd.PersistentFlags().StringVarP(&allRootOptions.Period, "period", "p", "", "period of time, such as: days, hours, minutes")
+	rootCmd.PersistentFlags().StringVarP(&allRootOptions.Unit, "unit", "u", "", "unit of time, such as: days, hours, minutes")
+	rootCmd.PersistentFlags().StringVarP(&allRootOptions.Padding, "padding","p", "", "add time to range before considering a gap between two dates")
 	rootCmd.PersistentFlags().BoolVarP(&allRootOptions.SkipWeekends, "skipWeekends", "s", false, "allow gaps on weekends when set")
 	rootCmd.PersistentFlags().StringVarP(&allRootOptions.SkipDays, "skipDays", "S", "", "skip comma-delimited set of fully spelled out days")
 	rootCmd.PersistentFlags().IntVarP(&allRootOptions.Debug, "debug", "D", 0, "enable verbose debugging, set to 999 or 9999")

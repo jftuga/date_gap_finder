@@ -32,7 +32,7 @@ func GetDuration(a int, period string) time.Duration {
 		duration = "s"
 	} else if period == "days" {
 		duration="h"
-		a += 24
+		a *= 24
 	} else {
 		log.Fatalf("Error #80620: unable to convert to time.Duration: '%d, %s'\n", a, period)
 	}
@@ -55,7 +55,7 @@ func GetDurationInSeconds(a int, period string) int {
 		duration = "s"
 	} else if period == "days" {
 		duration="h"
-		a += 24
+		a *= 24
 	} else {
 		log.Fatalf("Error #80620: unable to convert to time.Duration: '%d, %s'\n", a, period)
 	}

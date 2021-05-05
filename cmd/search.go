@@ -29,7 +29,9 @@ import (
 	"github.com/spf13/cobra"
 	"log"
 	"os"
+	"sort"
 	"strings"
+	"time"
 )
 
 // searchCmd represents the search command
@@ -96,19 +98,180 @@ func SearchOneFile(fname string) ([]goment.Goment, string) {
 	return findMissingDates(csvDates, requiredDates), csvStyleDate
 }
 
-func findMissingDates(csvDates, requiredDates []goment.Goment) []goment.Goment {
+func show(req, csv, missing []goment.Goment, c, r int) {
+	DisplayTable(missing,"seendate", false, -1)
+	DisplayTable(csv,"csvdate", false, c)
+	DisplayTable(req,"reqdate", true, r)
+	fmt.Println("======================================================")
+}
+
+func findMissingDates(csvDate, requiredDates []goment.Goment) []goment.Goment {
+	//debugLevel := allRootOptions.Debug
+	//fmt.Println()
+	//fmt.Println("=================================================================")
+	//fmt.Println()
+	//maxTimeDiff := GetDuration(allRootOptions.Amount, allRootOptions.Unit)
+	//padTime, _ := time.ParseDuration("0s")
+	//fmt.Println("maxTimeDiff:", maxTimeDiff)
+	//fmt.Println("    padTime:", padTime)
+	//fmt.Println()
+
+	var seenDates []goment.Goment
+	//csvDate := csvDates
+	c := len(csvDate) - 1
+	r := 0
+	reqDate := requiredDates
+
+	for {
+		for {
+			fmt.Println()
+			fmt.Println("========================================================")
+			fmt.Println("c, len(csvDate), r, len(reqDate)", c, len(csvDate), r, len(reqDate))
+			fmt.Printf("about to compare csv:%s\n", csvDate[c].Format(dateOutputFmt))
+			fmt.Printf("                 req:%s\n", reqDate[r].Format(dateOutputFmt))
+			//show(reqDate, csvDate, seenDates, c, r)
+			if csvDate[c].IsSameOrBefore(&reqDate[r]) {
+				fmt.Printf("added to seenDate: %s   c:%d", reqDate[r].Format(dateOutputFmt), c)
+				seenDates = append(seenDates, reqDate[r])
+				reqDate = RemoveSliceItem(reqDate, r)
+				csvDate = BeheadSlice(csvDate, c)
+				if len(reqDate) == 0 {
+					break
+				}
+				c = len(csvDate)
+			}
+			c -= 1
+			if c == -1 {
+				break
+			}
+		} // for inner
+		r += 1
+		c = len(csvDate) - 1
+		if c == -1 {
+			break
+		}
+		if r == len(reqDate) {
+			break
+		}
+		fmt.Println("22 c, len(csvDate), r, len(reqDate)", c, len(csvDate), r, len(reqDate))
+	}
+
+
+	fmt.Println()
+	fmt.Println("vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv")
+	DisplayTable(seenDates,"seenDates", false, -1)
+	DisplayTable(csvDate,"csvDate", false, -1)
+	DisplayTable(reqDate,"reqDate", false, -1)
+
+	/*
+	for {
+		fmt.Println("c, len(csvDate), r, len(reqDate)", c, len(csvDates), r, len(reqDate))
+		show(reqDate,csvDate,missingDates)
+		if len(reqDate) == 0 {
+			break
+		}
+		if csvDate[c].IsSameOrBefore(&reqDate[r]) {
+			reqDate = RemoveSliceItem(reqDate,r)
+			csvDate = RemoveSliceItem(csvDate,c)
+			c = -1
+			r = -1
+		} else {
+			missingDates = append(missingDates, reqDate[r])
+			fmt.Println("zzzzzzzzzzzzzzzzzzzzzzzzzz")
+			//reqDate = RemoveSliceItem(reqDate,r)
+			csvDate = RemoveSliceItem(csvDate,c)
+			c = -1
+			r = -1
+		}
+		c += 1
+		r += 1
+	}
+	*/
+
+	/*
+	for {
+		show(reqDate,csvDate)
+		fmt.Printf("cmp c:%s\n", csvDate[c].Format(dateOutputFmt))
+		fmt.Printf("    r:%s\n", reqDate[r].Format(dateOutputFmt))
+		fmt.Println()
+		if csvDate[c].IsAfter(&reqDate[r]) {
+			fmt.Println("BOOM!")
+			missingDates = append(missingDates, reqDate[r])
+			reqDate = RemoveSliceItem(reqDate,r)
+			fmt.Println("xxxxxxxxxxxxxx:", len(reqDate))
+			r = -1
+		}
+		c += 1
+		r += 1
+		fmt.Println("r:", r, len(reqDate), " c:", c, len(csvDates))
+		if r == len(reqDate) {
+			break
+		}
+	}
+	*/
+
+	/*
+	fmt.Println("reqDates")
+	fmt.Println("============")
+	for _, m := range reqDate {
+		fmt.Println(m.Format(dateOutputFmt))
+	}
+	fmt.Println()
+
+	fmt.Println("missingDates")
+	fmt.Println("============")
+	for _, m := range missingDates {
+		fmt.Println(m.Format(dateOutputFmt))
+	}
+
+	fmt.Println("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
+
+	 */
+	return reqDate
+}
+
+func findMissingDates2(csvDates, requiredDates []goment.Goment) []goment.Goment {
 	debugLevel := allRootOptions.Debug
 
-	maxTimeDiff := GetDuration(allRootOptions.Amount, allRootOptions.Period)
-	seenDates := make(map [int64]bool)
+	maxTimeDiff := GetDuration(allRootOptions.Amount, allRootOptions.Unit)
+	padTime, _ := time.ParseDuration("0s")
+	var err error
+	if len(allRootOptions.Padding) > 0 {
+		padTime, err = time.ParseDuration(allRootOptions.Padding)
+		if err != nil {
+			log.Fatalf("Error #29680: unable to convert to time.Duration: '%s, %s'\n", allRootOptions.Padding, err)
+		}
+	}
+	maxTimeDiff = time.Duration(maxTimeDiff + padTime)
+	if debugLevel > 98 {
+		fmt.Println("maxTimeDiff:", maxTimeDiff)
+		fmt.Println("===========================")
+	}
+	seenDates := make(map [time.Time]bool)
 	for _, reqDate := range requiredDates {
-		for _, csvDate := range csvDates {
+		for i, csvDate := range csvDates {
+			if debugLevel > 98 {
+				fmt.Println()
+				fmt.Println("csvDate:", csvDate.Format(dateOutputFmt))
+				fmt.Println("reqDate:", reqDate.Format(dateOutputFmt))
+
+			}
 			if csvDate.IsSameOrBefore(&reqDate) {
-				key := reqDate.ToUnix()
+				key := reqDate.ToTime()
+				if csvDate.Format(dateOutputFmt) == "03/12/2021 6:40:01 PM Friday" {
+					fmt.Println("dbg")
+				}
 				// compare the time duration difference
 				diff := GetTimeDifference(csvDate,reqDate)
-				if diff.Seconds() < maxTimeDiff.Seconds() {
+				if debugLevel > 98 {
+					fmt.Println("diff:", diff, "  maxTimeDiff:", maxTimeDiff, "   diff < maxTimeDiff:", diff.Seconds() < maxTimeDiff.Seconds())
+					//fmt.Println()
+				}
+				if diff.Seconds() <= maxTimeDiff.Seconds() {
+					fmt.Println("seenDate:", key)
 					seenDates[key] = true
+					csvDates = RemoveSliceItem(csvDates,i)
+					break // FIXME
 				}
 			}
 		}
@@ -118,9 +281,13 @@ func findMissingDates(csvDates, requiredDates []goment.Goment) []goment.Goment {
 		fmt.Println()
 		fmt.Println("seenDates")
 		fmt.Println("============")
+		var sortedSeen []string
 		for key := range seenDates {
-			g, _ := goment.Unix(key)
-			fmt.Println(g.Format(dateOutputFmt))
+			sortedSeen = append(sortedSeen,key.String())
+		}
+		sort.Strings(sortedSeen)
+		for _, seen := range sortedSeen {
+			fmt.Println(seen)
 		}
 	}
 
@@ -136,7 +303,7 @@ func findMissingDates(csvDates, requiredDates []goment.Goment) []goment.Goment {
 	}
 	var allMissingDates []goment.Goment
 	for _, reqDate := range requiredDates {
-		toCheck := reqDate.ToUnix()
+		toCheck := reqDate.ToTime()  //FIXME
 		if allRootOptions.SkipWeekends && (reqDate.Format("dddd") == "Saturday" || reqDate.Format("dddd") == "Sunday") {
 			if debugLevel > 98 {
 				fmt.Println("skipping weekend:", reqDate.Format(dateOutputFmt))
@@ -154,7 +321,8 @@ func findMissingDates(csvDates, requiredDates []goment.Goment) []goment.Goment {
 		if !ok {
 			allMissingDates = append(allMissingDates, reqDate)
 			if debugLevel > 98 {
-				g, _ := goment.Unix(toCheck)
+				//g, _ := goment.Unix(toCheck) //FIXME
+				g, _ := goment.New(toCheck)
 				fmt.Printf("missing date: %s\n", g.Format(dateOutputFmt))
 			}
 		}
@@ -188,6 +356,8 @@ func getCsvDates(allRecords [][]string) ([]goment.Goment, map[string][]string) {
 }
 
 func getCsvAndRequiredDates(input *csv.Reader, streamName string) ([]goment.Goment, []goment.Goment, string) {
+	debugLevel := allRootOptions.Debug
+
 	allRecords, err := input.ReadAll()
 	if err != nil {
 		log.Fatalf("Error #89533: Unable to read from stream: '%s'; %s\n", streamName, err)
@@ -221,11 +391,14 @@ func getCsvAndRequiredDates(input *csv.Reader, streamName string) ([]goment.Gome
 	csvStyleDate := ConvertDate(first.ToTime(), layout)
 
 	var requiredDates []goment.Goment
-	durationInSeconds := GetDurationInSeconds(allRootOptions.Amount, allRootOptions.Period)
+	durationInSeconds := GetDurationInSeconds(allRootOptions.Amount, allRootOptions.Unit)
 	current, _ := goment.New(first)
 	for {
 		if current.IsAfter(last) {
 			break
+		}
+		if debugLevel > 99998 {
+			fmt.Println("current:", current.Format(dateOutputFmt))
 		}
 		requiredDates = append(requiredDates, *current)
 		current.Add(durationInSeconds, "seconds")
