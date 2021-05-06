@@ -29,8 +29,6 @@ import (
 	"github.com/spf13/cobra"
 	"log"
 	"os"
-	"sort"
-	"strings"
 	"time"
 )
 
@@ -69,6 +67,9 @@ func SearchOneFile(fname string) ([]goment.Goment, string) {
 	debugLevel := allRootOptions.Debug
 	input, file := fileOps.CsvOpenRead(fname)
 	var r []rune
+	if allRootOptions.TabDelimiter {
+		allRootOptions.CsvDelimiter = "\\t"
+	}
 	if allRootOptions.CsvDelimiter == `\t` {
 		r = []rune{'\t'}
 	} else {
@@ -147,11 +148,11 @@ func GetPaddingRange(g goment.Goment) (goment.Goment, goment.Goment){
 func IsNear(csv goment.Goment, reqDate []goment.Goment) (bool, int) {
 	for r, req := range reqDate {
 		a, b := GetPaddingRange(req)
-		fmt.Println("  a:", a.Format(dateOutputFmt))
+/*		fmt.Println("  a:", a.Format(dateOutputFmt))
 		fmt.Println("  b:", b.Format(dateOutputFmt))
-		fmt.Println("csv:", csv.Format(dateOutputFmt))
+		fmt.Println("csv:", csv.Format(dateOutputFmt))*/
 		if csv.IsBetween(&a, &b) {
-			fmt.Printf("%s is near %s\n", csv.Format(dateOutputFmt), req.Format(dateOutputFmt))
+			//fmt.Printf("%s is near %s\n", csv.Format(dateOutputFmt), req.Format(dateOutputFmt))
 			return true, r
 		}
 	}
@@ -159,277 +160,18 @@ func IsNear(csv goment.Goment, reqDate []goment.Goment) (bool, int) {
 }
 
 func findMissingDates(csvDate, reqDate []goment.Goment) []goment.Goment {
-	//debugLevel := allRootOptions.Debug
-	//fmt.Println()
-	//fmt.Println("=================================================================")
-	//fmt.Println()
-	//maxTimeDiff := GetDuration(allRootOptions.Amount, allRootOptions.Unit)
-	//padTime, _ := time.ParseDuration("0s")
-	//fmt.Println("maxTimeDiff:", maxTimeDiff)
-	//fmt.Println("    padTime:", padTime)
-	//fmt.Println()
-
-	var seenDates []goment.Goment
-
 	for _, csv := range csvDate {
 		found, r := IsNear(csv, reqDate)
 		if found {
-			seenDates = append(seenDates, reqDate[r])
 			reqDate = RemoveSliceItem(reqDate,r)
 		}
 	}
 
-	// c = 0
-/*	for {
-		for {
-			fmt.Println()
-			fmt.Println("========================================================")
-			fmt.Println("c, len(csvDate), r, len(reqDate)", c, len(csvDate), r, len(reqDate))
-			fmt.Printf("about to compare csv:%s\n", csvDate[c].Format(dateOutputFmt))
-			//fmt.Printf("                 req:%s\n", reqDate[r].Format(dateOutputFmt))
-			extendedTime := getExtendedTime(reqDate[r])
-			fmt.Printf("        extendedTime:%s\n", extendedTime.Format(dateOutputFmt))
-			show(reqDate, csvDate, seenDates, c, r)
-
-			if csvDate[c].IsSameOrBefore(extendedTime) {
-				fmt.Printf("added to seenDate: %s   c:%d\n", reqDate[r].Format(dateOutputFmt), c)
-				if FindInSlice(seenDates, reqDate[r]) == -1 {
-					seenDates = append(seenDates, reqDate[r])
-				} else {
-					fmt.Println("(but it was already added beforehand")
-				}
-				csvDate = BeheadSlice(csvDate, c)
-				c = -1
-			} else {
-				fmt.Println("removing head from reqDate and csvDate")
-				reqDate = BeheadSlice(reqDate,r)
-				csvDate = BeheadSlice(csvDate, c)
-				if len(csvDate) == 0{
-					fmt.Println("start debug")
-				}
-				c = -1
-			}
-			c += 1
-		} // for inner
-		r += 1
-		fmt.Println("22 c, len(csvDate), r, len(reqDate)", c, len(csvDate), r, len(reqDate))
-	}
-*/
-/*	for {
-		for {
-			fmt.Println()
-			fmt.Println("========================================================")
-			fmt.Println("c, len(csvDate), r, len(reqDate)", c, len(csvDate), r, len(reqDate))
-			fmt.Printf("about to compare csv:%s\n", csvDate[c].Format(dateOutputFmt))
-			fmt.Printf("                 req:%s\n", reqDate[r].Format(dateOutputFmt))
-			extendedTime := getExtendedTime(reqDate[r])
-			fmt.Printf("        extendedTime:%s\n", extendedTime.Format(dateOutputFmt))
-			show(reqDate, csvDate, seenDates, c, r)
-			if csvDate[c].IsSameOrBefore(extendedTime) {
-				fmt.Printf("added to seenDate: %s   c:%d", reqDate[r].Format(dateOutputFmt), c)
-				seenDates = append(seenDates, reqDate[r])
-				reqDate = RemoveSliceItem(reqDate, r)
-				csvDate = BeheadSlice(csvDate, c)
-				if len(reqDate) == 0 {
-					break
-				}
-				c = len(csvDate)
-			}
-			c -= 1
-			if c == -1 {
-				break
-			}
-		} // for inner
-		r += 1
-		c = len(csvDate) - 1
-		if c == -1 {
-			break
-		}
-		if r == len(reqDate) {
-			break
-		}
-		fmt.Println("22 c, len(csvDate), r, len(reqDate)", c, len(csvDate), r, len(reqDate))
-	}*/
-
-
-	fmt.Println()
-	fmt.Println("vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv")
-	DisplayTable(seenDates,"seenDates", false, -1)
+/*	fmt.Println()
 	DisplayTable(csvDate,"csvDate", false, -1)
-	DisplayTable(reqDate,"reqDate", false, -1)
+	DisplayTable(reqDate,"reqDate", false, -1)*/
 
-	/*
-	for {
-		fmt.Println("c, len(csvDate), r, len(reqDate)", c, len(csvDates), r, len(reqDate))
-		show(reqDate,csvDate,missingDates)
-		if len(reqDate) == 0 {
-			break
-		}
-		if csvDate[c].IsSameOrBefore(&reqDate[r]) {
-			reqDate = RemoveSliceItem(reqDate,r)
-			csvDate = RemoveSliceItem(csvDate,c)
-			c = -1
-			r = -1
-		} else {
-			missingDates = append(missingDates, reqDate[r])
-			fmt.Println("zzzzzzzzzzzzzzzzzzzzzzzzzz")
-			//reqDate = RemoveSliceItem(reqDate,r)
-			csvDate = RemoveSliceItem(csvDate,c)
-			c = -1
-			r = -1
-		}
-		c += 1
-		r += 1
-	}
-	*/
-
-	/*
-	for {
-		show(reqDate,csvDate)
-		fmt.Printf("cmp c:%s\n", csvDate[c].Format(dateOutputFmt))
-		fmt.Printf("    r:%s\n", reqDate[r].Format(dateOutputFmt))
-		fmt.Println()
-		if csvDate[c].IsAfter(&reqDate[r]) {
-			fmt.Println("BOOM!")
-			missingDates = append(missingDates, reqDate[r])
-			reqDate = RemoveSliceItem(reqDate,r)
-			fmt.Println("xxxxxxxxxxxxxx:", len(reqDate))
-			r = -1
-		}
-		c += 1
-		r += 1
-		fmt.Println("r:", r, len(reqDate), " c:", c, len(csvDates))
-		if r == len(reqDate) {
-			break
-		}
-	}
-	*/
-
-	/*
-	fmt.Println("reqDates")
-	fmt.Println("============")
-	for _, m := range reqDate {
-		fmt.Println(m.Format(dateOutputFmt))
-	}
-	fmt.Println()
-
-	fmt.Println("missingDates")
-	fmt.Println("============")
-	for _, m := range missingDates {
-		fmt.Println(m.Format(dateOutputFmt))
-	}
-
-	fmt.Println("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
-
-	 */
-	return seenDates
-}
-
-func findMissingDates2(csvDates, requiredDates []goment.Goment) []goment.Goment {
-	debugLevel := allRootOptions.Debug
-
-	maxTimeDiff := GetDuration(allRootOptions.Amount, allRootOptions.Unit)
-	padTime, _ := time.ParseDuration("0s")
-	var err error
-	if len(allRootOptions.Padding) > 0 {
-		padTime, err = time.ParseDuration(allRootOptions.Padding)
-		if err != nil {
-			log.Fatalf("Error #29680: unable to convert to time.Duration: '%s, %s'\n", allRootOptions.Padding, err)
-		}
-	}
-	maxTimeDiff = time.Duration(maxTimeDiff + padTime)
-	if debugLevel > 98 {
-		fmt.Println("maxTimeDiff:", maxTimeDiff)
-		fmt.Println("===========================")
-	}
-	seenDates := make(map [time.Time]bool)
-	for _, reqDate := range requiredDates {
-		for i, csvDate := range csvDates {
-			if debugLevel > 98 {
-				fmt.Println()
-				fmt.Println("csvDate:", csvDate.Format(dateOutputFmt))
-				fmt.Println("reqDate:", reqDate.Format(dateOutputFmt))
-
-			}
-			if csvDate.IsSameOrBefore(&reqDate) {
-				key := reqDate.ToTime()
-				if csvDate.Format(dateOutputFmt) == "03/12/2021 6:40:01 PM Friday" {
-					fmt.Println("dbg")
-				}
-				// compare the time duration difference
-				diff := GetTimeDifference(csvDate,reqDate)
-				if debugLevel > 98 {
-					fmt.Println("diff:", diff, "  maxTimeDiff:", maxTimeDiff, "   diff < maxTimeDiff:", diff.Seconds() < maxTimeDiff.Seconds())
-					//fmt.Println()
-				}
-				if diff.Seconds() <= maxTimeDiff.Seconds() {
-					fmt.Println("seenDate:", key)
-					seenDates[key] = true
-					csvDates = RemoveSliceItem(csvDates,i)
-					break // FIXME
-				}
-			}
-		}
-	}
-
-	if debugLevel > 98 {
-		fmt.Println()
-		fmt.Println("seenDates")
-		fmt.Println("============")
-		var sortedSeen []string
-		for key := range seenDates {
-			sortedSeen = append(sortedSeen,key.String())
-		}
-		sort.Strings(sortedSeen)
-		for _, seen := range sortedSeen {
-			fmt.Println(seen)
-		}
-	}
-
-	if debugLevel > 98 {
-		fmt.Println()
-		fmt.Println("MissingDates")
-		fmt.Println("============")
-	}
-
-	var allSkipDaysLower string
-	if len(allRootOptions.SkipDays) > 0 {
-		allSkipDaysLower = strings.ToLower(allRootOptions.SkipDays)
-	}
-	var allMissingDates []goment.Goment
-	for _, reqDate := range requiredDates {
-		toCheck := reqDate.ToTime()  //FIXME
-		if allRootOptions.SkipWeekends && (reqDate.Format("dddd") == "Saturday" || reqDate.Format("dddd") == "Sunday") {
-			if debugLevel > 98 {
-				fmt.Println("skipping weekend:", reqDate.Format(dateOutputFmt))
-			}
-			continue
-		}
-		skipDayLower := strings.ToLower(reqDate.Format("dddd"))
-		if len(allRootOptions.SkipDays) > 0 && strings.Index(allSkipDaysLower,skipDayLower) >= 0 {
-			if debugLevel > 98 {
-				fmt.Println("skipping day:", reqDate.Format(dateOutputFmt))
-			}
-			continue
-		}
-		_, ok := seenDates[toCheck]
-		if !ok {
-			allMissingDates = append(allMissingDates, reqDate)
-			if debugLevel > 98 {
-				//g, _ := goment.Unix(toCheck) //FIXME
-				g, _ := goment.New(toCheck)
-				fmt.Printf("missing date: %s\n", g.Format(dateOutputFmt))
-			}
-		}
-	}
-
-	if debugLevel > 98 {
-		fmt.Println()
-		fmt.Println("==========================================================")
-		fmt.Println()
-	}
-
-	return allMissingDates
+	return reqDate
 }
 
 func getCsvDates(allRecords [][]string) ([]goment.Goment, map[string][]string) {
