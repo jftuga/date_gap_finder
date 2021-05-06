@@ -24,9 +24,10 @@ func TestInsert1(t *testing.T) {
 	data := "Date,Errors,Warnings\n2021-04-15 06:55:01,0,23\n2021-04-15 08:30:26,0,23\n2021-04-16 06:55:01,0,23\n2021-04-19 06:55:01,0,23"
 	CreateCSVFile(fname, data)
 
-	allRootOptions.Amount = 1442
+	allRootOptions.Amount = 1440
 	allRootOptions.Unit = "minutes"
 	allRootOptions.Column = 0
+	allRootOptions.Padding = "1s"
 
 	allInsertOptions.columnInserts = []string {"1,-1", "2,999"}
 
@@ -37,8 +38,8 @@ func TestInsert1(t *testing.T) {
 	iss.Equal(csv[1], "2021-04-15 06:55:01,0,23")
 	iss.Equal(csv[2], "2021-04-15 08:30:26,0,23")
 	iss.Equal(csv[3], "2021-04-16 06:55:01,0,23")
-	iss.Equal(csv[4], "2021-04-17 06:59:01,-1,999")
-	iss.Equal(csv[5], "2021-04-18 07:01:01,-1,999")
+	iss.Equal(csv[4], "2021-04-17 06:55:01,-1,999")
+	iss.Equal(csv[5], "2021-04-18 06:55:01,-1,999")
 	iss.Equal(csv[6], "2021-04-19 06:55:01,0,23")
 }
 
@@ -80,6 +81,7 @@ func TestInsert3(t *testing.T) {
 	allRootOptions.Column = 0
 	allRootOptions.CsvDelimiter = ","
 	allRootOptions.SkipWeekends = false
+	allRootOptions.Padding = "3m"
 
 	allInsertOptions.columnInserts = []string{"2,-1"}
 	allInsertOptions.allColumnInserts = "999"
@@ -110,12 +112,13 @@ func TestInsert4(t *testing.T) {
 		log.Fatalln(err)
 	}
 
-	allRootOptions.Amount = 25
+	allRootOptions.Amount = 24
 	allRootOptions.Unit = "hours"
 	allRootOptions.Column = 0
 	allRootOptions.CsvDelimiter = ","
 	allRootOptions.SkipWeekends = true
 	allRootOptions.HasHeader = true
+	allRootOptions.Padding = "2m"
 
 	allInsertOptions.columnInserts = []string{"1,-1"}
 	allInsertOptions.allColumnInserts = ""
@@ -127,7 +130,7 @@ func TestInsert4(t *testing.T) {
 	iss.Equal(csv[0], "Date,Amount")
 	iss.Equal(csv[1], "2021-04-01 18:40:00,318")
 	iss.Equal(csv[2], "2021-04-02 18:40:00,252")
-	iss.Equal(csv[3], "2021-04-05 22:40:00,-1")
+	iss.Equal(csv[3], "2021-04-05 18:40:00,-1")
 	iss.Equal(csv[4], "2021-04-06 18:40:00,291")
 	iss.Equal(csv[5], "2021-04-07 18:40:00,274")
 	iss.Equal(csv[6], "2021-04-08 18:40:01,243")
@@ -160,23 +163,23 @@ func TestInsert5(t *testing.T) {
 		log.Fatalln(err)
 	}
 
-	allRootOptions.Amount = 25
+	allRootOptions.Amount = 24
 	allRootOptions.Unit = "hours"
 	allRootOptions.Column = 0
 	allRootOptions.CsvDelimiter = ","
 	allRootOptions.SkipWeekends = true
 	allRootOptions.HasHeader = false
-
 	allInsertOptions.columnInserts = []string{"1,-1"}
 	allInsertOptions.allColumnInserts = ""
 	allInsertOptions.Overwrite = true
+	allRootOptions.Padding = "2s"
 
 	csv := insertOneFile(fname)
 	iss := is.New(t)
 	iss.Equal(len(csv), 6)
 	iss.Equal(csv[0], "2021-04-01 18:40:00,318")
 	iss.Equal(csv[1], "2021-04-02 18:40:00,252")
-	iss.Equal(csv[2], "2021-04-05 22:40:00,-1")
+	iss.Equal(csv[2], "2021-04-05 18:40:00,-1")
 	iss.Equal(csv[3], "2021-04-06 18:40:00,291")
 	iss.Equal(csv[4], "2021-04-07 18:40:00,274")
 	iss.Equal(csv[5], "2021-04-08 18:40:01,243")
