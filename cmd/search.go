@@ -207,7 +207,7 @@ func getCsvDates(allRecords [][]string) ([]goment.Goment, map[string][]string) {
 	var csvDates []goment.Goment
 	allRows := make(map [string][]string)
 	for i, d := range allRecords {
-		if allRootOptions.HasHeader && i == 0 {
+		if !allRootOptions.HasNoHeader && i == 0 {
 			continue
 		}
 		g, err := goment.New(d[allRootOptions.Column])
@@ -235,7 +235,7 @@ func getCsvAndRequiredDates(input *csv.Reader, streamName string) ([]goment.Gome
 
 	// build requiredDates
 	f := 0
-	if allRootOptions.HasHeader {
+	if !allRootOptions.HasNoHeader {
 		f = 1
 	}
 	if f >= len(allRecords) {

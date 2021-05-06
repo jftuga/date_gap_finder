@@ -117,7 +117,7 @@ func TestInsert4(t *testing.T) {
 	allRootOptions.Column = 0
 	allRootOptions.CsvDelimiter = ","
 	allRootOptions.SkipWeekends = true
-	allRootOptions.HasHeader = true
+	allRootOptions.HasNoHeader = false
 	allRootOptions.Padding = "2m"
 
 	allInsertOptions.columnInserts = []string{"1,-1"}
@@ -168,7 +168,7 @@ func TestInsert5(t *testing.T) {
 	allRootOptions.Column = 0
 	allRootOptions.CsvDelimiter = ","
 	allRootOptions.SkipWeekends = true
-	allRootOptions.HasHeader = false
+	allRootOptions.HasNoHeader = true
 	allInsertOptions.columnInserts = []string{"1,-1"}
 	allInsertOptions.allColumnInserts = ""
 	allInsertOptions.Overwrite = true

@@ -46,7 +46,7 @@ func TestSearch1(t *testing.T) {
 	allRootOptions.Column = 0
 	allRootOptions.CsvDelimiter = ","
 	allRootOptions.SkipWeekends = false
-	allRootOptions.HasHeader = true
+	allRootOptions.HasNoHeader = false
 
 	missingDates, csvStyleDate := SearchOneFile(fname)
 	debug(missingDates, csvStyleDate)
@@ -144,7 +144,7 @@ func TestSearch5(t *testing.T) {
 	allRootOptions.Column = 0
 	allRootOptions.CsvDelimiter = ","
 	allRootOptions.SkipWeekends = true
-	allRootOptions.HasHeader = false
+	allRootOptions.HasNoHeader = true
 
 	missingDates, csvStyleDate := SearchOneFile(fname)
 
@@ -167,7 +167,7 @@ func TestSearch6(t *testing.T) {
 	allRootOptions.Column = 0
 	allRootOptions.CsvDelimiter = "\t"
 	allRootOptions.SkipWeekends = false
-	allRootOptions.HasHeader = true
+	allRootOptions.HasNoHeader = false
 	allRootOptions.SkipDays = "Wednesday,Thursday"
 
 	missingDates, csvStyleDate := SearchOneFile(fname)
@@ -189,11 +189,10 @@ func TestSearch7(t *testing.T) {
 	allRootOptions.Column = 0
 	allRootOptions.CsvDelimiter = ","
 	allRootOptions.SkipWeekends = true
-	allRootOptions.HasHeader = false
+	allRootOptions.HasNoHeader = true
 
 	missingDates, csvStyleDate := SearchOneFile(fname)
 	iss := is.New(t)
 	iss.Equal(len(missingDates), 0)
 	iss.Equal(csvStyleDate,"2021-04-15 06:55:01")
-
 }

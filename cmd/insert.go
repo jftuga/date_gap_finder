@@ -105,7 +105,7 @@ func insertOneFile(fname string) []string {
 	}
 
 	row := 0
-	if allRootOptions.HasHeader {
+	if !allRootOptions.HasNoHeader {
 		row = 1
 	}
 	layout := allRecords[row][allRootOptions.Column]
@@ -152,14 +152,14 @@ func insertOneFile(fname string) []string {
 		delimiter = fmt.Sprintf("%c", 0x09)
 	}
 	for i, rec := range sortedRecords {
-		if allRootOptions.HasHeader && i == len(sortedRecords)-1 {
+		if !allRootOptions.HasNoHeader && i == len(sortedRecords)-1 {
 			headerRow = rec
 			//fmt.Println("headerRow:", headerRow)
 			continue
 		}
 		csvRecords = append(csvRecords, strings.Join(rec,delimiter))
 	}
-	if allRootOptions.HasHeader {
+	if !allRootOptions.HasNoHeader {
 		csvRecords = append([]string {strings.Join(headerRow,delimiter)}, csvRecords...)
 	}
 

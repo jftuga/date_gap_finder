@@ -30,7 +30,7 @@ var cfgFile string
 
 type rootOptions struct {
 	Column int
-	HasHeader bool
+	HasNoHeader bool
 	Amount int
 	Unit string
 	Padding string
@@ -61,7 +61,7 @@ func Execute() {
 
 func init() {
 	rootCmd.PersistentFlags().IntVarP(&allRootOptions.Column, "column", "c", 0, "CSV column number (starts at zero)")
-	rootCmd.PersistentFlags().BoolVarP(&allRootOptions.HasHeader, "header", "H", true, "if CSV file has header line")
+	rootCmd.PersistentFlags().BoolVarP(&allRootOptions.HasNoHeader, "noheader", "n", false, "set if CSV file does not have header line")
 	rootCmd.PersistentFlags().IntVarP(&allRootOptions.Amount, "amount", "a", -1, "a maximum, numeric duration")
 	rootCmd.PersistentFlags().StringVarP(&allRootOptions.Unit, "unit", "u", "", "unit of time, such as: days, hours, minutes")
 	rootCmd.PersistentFlags().StringVarP(&allRootOptions.Padding, "padding","p", "1s", "add time to range before considering a gap between two dates")
@@ -74,4 +74,3 @@ func init() {
 	versionTemplate := fmt.Sprintf("%s v%s\n%s\n", pgmName, pgmVersion, pgmURL)
 	rootCmd.SetVersionTemplate(versionTemplate)
 }
-
