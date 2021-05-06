@@ -67,7 +67,7 @@ This example file is called `e.csv`, which *should* get updated once per day. On
 
 __
 
-## search For date gaps
+## search for date gaps
 * Search for gaps occurring more than `1 day` apart
 
 ```
@@ -93,12 +93,12 @@ $ date_gap_finder search -a 1 -u days -S Sunday e.csv
 2021-04-17 06:55:01
 ```
 
-## insert rows For date gaps
-* Adds data for missing dates
-* CSV columns start 0
+## insert rows for date gaps
+* Adds column data for missing dates
+* **CSV columns start 0**
 * * `-r 1,1` - in column `1`, insert a value of `-1`
 * * `-r 2,999` - in column `2`, insert a value of `999`
-* * Note that multiple `-r` values can be used
+* * Note that multiple `-r` switches can be used
 ```
 PS C:\> .\date_gap_finder.exe insert -a 1 -u days -r 1,-1 -r 2,999 .\e.csv
 Date,Errors,Warnings
@@ -110,10 +110,10 @@ Date,Errors,Warnings
 2021-04-19 06:55:01,0,23
 ```
 
-## insert rows for date gaps with all of the same values
+## insert rows for date gaps with the same value
 * Similar to above, but use one `-R` switch instead of two `-r` switches
-* * `-R 567` - in all `non-date` columns insert a values of `567`
-* * Note that `-R` and `-r` can both be simultaneously used, with `-r` having precedence
+* * `-R 567` - excluding the `non-date` column, insert values of `567`
+* * Note that `-R` and `-r` can be simultaneously used, with `-r` having precedence over `-R`
 ```
 $ date_gap_finder insert -a 1 -u days -R 567 e.csv
 Date,Errors,Warnings
@@ -127,9 +127,10 @@ Date,Errors,Warnings
 
 ## insert rows for date gaps and overwrite original file
 * Use `-O` to overwrite the original file
-* * a *date-version* backup file will be created containing the original file
+* * a *date-versioned* backup file will be created containing the original file
 * Use `-R` to add `0` to all missing columns of all missing rows
 * Note that a backup file similar to this has been created: `e--20210506.162151.bak`
+* * The naming convention is `filename--YYYYMMDD.HHMMSS.bak`
 ```
 PS C:> .\date_gap_finder.exe insert -a 1 -u days -R 0 -O .\e.csv
 PS C:> cat e.csv
@@ -145,7 +146,7 @@ ___
 
 ## Example 2
 
-This example file is called `f.csv`, which *should* get updated once per day. However, each entry is off by a few seconds.  You can use the `-p` switch to correct for this.  It will pad time before and after the correct time.
+This example file is called `f.csv`, which *should* get updated once per day. However, each entry is off by a few seconds.  You can use the `-p` switch to correct for this.  It will pad time before and after the correct time. It is missing `5` days: `12-14` and `17-18`.
 
 | Date | Total | 
 |------|-------|
@@ -159,7 +160,9 @@ __
 
 ## search for date gaps and use time padding
 * If a `6 second` time padding is not used, then `8` rows will be returned.  This is most likely not an accurate result since the times are only off by a few seconds. By using `-p 6s` an accurate list of missing rows is returned.
-* Note that `24 hours` instead of `1 day` is used.
+* Padding can end in `s` for seconds, `m` for minutes, or `h` for hours. `Days` are not supported.
+* Note that `24 hours` is used instead of `1 day`.
+* **It is better to use time padding (-p) vs. using a longer time amount (-a)**
 ```
 $ date_gap_finder search -a 24 -u hours -p 6s f.csv
 2021-03-12 18:40:01
@@ -172,7 +175,7 @@ ___
 
 ## Example 3
 
-This example file is called `g.csv`.  The `date` column is `1` instead of the normal `0`.  It is also delimited by the `tab` character instead of the `comma` character.
+This example file is called `g.csv`.  The `date` column is in `1` instead of the normal column `0`.  This file is also delimited by the `tab` character instead of the `comma` character. It has a date gap consisting of `04-15` through `04-18`.
 
 | Processed | Date |
 |-----------|------|
@@ -182,7 +185,7 @@ This example file is called `g.csv`.  The `date` column is `1` instead of the no
 | 5222 | 2021-04-19
 __
 
-## search for gaps when date is not the first column and use different column delimiter
+## search for gaps when date is not the first column and use a different column delimiter
 * Use `-d "\t"` to define the column delimiter
 * * A short cut for the `tab` character is to simply use `-t` instead of `-d "\t"`
 * Use `-c` to denote column `1` instead of the default of column `0`
@@ -196,7 +199,7 @@ PS C:\> .\date_gap_finder.exe search -a 1440 -u minutes -d "\t" -c 1 .\g.csv
 ```
 
 ## insert data for date-gapped missing rows
-* Similar switches to above, except using `insert` instead of `search`
+* Similar switches to the above example, except that it is using the `insert` verb instead of `search`
 * `-r 0,9999` - in column `0`, insert a value of `9990`
 ```
 $ date_gap_finder insert -a 1440 -u minutes -t -c 1 -r 0,9999 g.csv
