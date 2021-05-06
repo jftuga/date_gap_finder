@@ -52,7 +52,7 @@ the column number first and the value to insert (into that column) second.`,
 
 func init() {
 	rootCmd.AddCommand(insertCmd)
-	insertCmd.Flags().StringArrayVarP(&allInsertOptions.columnInserts, "record", "r", []string{}, "insert record with missing data")
+	insertCmd.Flags().StringArrayVarP(&allInsertOptions.columnInserts, "record", "r", []string{}, "insert record with missing data; format: col#,value")
 	insertCmd.Flags().StringVarP(&allInsertOptions.allColumnInserts, "allRecords", "R", "", "insert data to all columns of a missing row")
 	insertCmd.PersistentFlags().BoolVarP(&allInsertOptions.Overwrite, "overwrite", "O", false, "overwrite existing CSV file; original file saved as .bak")
 }
