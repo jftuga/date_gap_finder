@@ -65,3 +65,13 @@ func BeheadSlice(s []goment.Goment, rm int) []goment.Goment {
 	}
 	return result
 }
+
+// FindInSlice - return the position of item in a slice, or -1 if not found
+func FindInSlice(s []goment.Goment, item goment.Goment) int {
+	for i, val := range s {
+		if val.Format(dateOutputFmt) == item.Format(dateOutputFmt) {
+			return i
+		}
+	}
+	return -1
+}

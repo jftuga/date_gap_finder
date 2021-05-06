@@ -68,7 +68,7 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&allRootOptions.HasHeader, "header", "H", true, "if CSV file has header line")
 	rootCmd.PersistentFlags().IntVarP(&allRootOptions.Amount, "amount", "a", -1, "a maximum, numeric duration")
 	rootCmd.PersistentFlags().StringVarP(&allRootOptions.Unit, "unit", "u", "", "unit of time, such as: days, hours, minutes")
-	rootCmd.PersistentFlags().StringVarP(&allRootOptions.Padding, "padding","p", "", "add time to range before considering a gap between two dates")
+	rootCmd.PersistentFlags().StringVarP(&allRootOptions.Padding, "padding","p", "0s", "add time to range before considering a gap between two dates")
 	rootCmd.PersistentFlags().BoolVarP(&allRootOptions.SkipWeekends, "skipWeekends", "s", false, "allow gaps on weekends when set")
 	rootCmd.PersistentFlags().StringVarP(&allRootOptions.SkipDays, "skipDays", "S", "", "skip comma-delimited set of fully spelled out days")
 	rootCmd.PersistentFlags().IntVarP(&allRootOptions.Debug, "debug", "D", 0, "enable verbose debugging, set to 999 or 9999")

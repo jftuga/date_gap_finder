@@ -105,7 +105,60 @@ func show(req, csv, missing []goment.Goment, c, r int) {
 	fmt.Println("======================================================")
 }
 
-func findMissingDates(csvDate, requiredDates []goment.Goment) []goment.Goment {
+func getExtendedTime(originalTime goment.Goment) *goment.Goment {
+	if len(allRootOptions.Padding) == 0 {
+		return &originalTime
+	}
+
+	var err error
+	padTime, _ := time.ParseDuration("0s")
+	padTime, err = time.ParseDuration(allRootOptions.Padding)
+	if err != nil {
+		log.Fatalf("Error #23606: unable to convert to time.Duration: '%s, %s'\n", allRootOptions.Padding, err)
+	}
+
+	newTime := originalTime.ToTime()
+	newTime = newTime.Add(padTime)
+	g, err := goment.New(newTime)
+	if err != nil {
+		log.Fatalf("Error #23819: unable to create goment Time: '%s, %s'\n", newTime, err)
+	}
+	return g
+}
+
+func GetPaddingRange(g goment.Goment) (goment.Goment, goment.Goment){
+	padTime, err := time.ParseDuration(allRootOptions.Padding)
+	if err != nil {
+		log.Fatalf("Error #90985: unable to create time duration for: %s; %s\n", allRootOptions.Padding, err)
+	}
+	a, err := goment.New(g.ToTime())
+	if err != nil {
+		log.Fatalf("Error #90990: unable to create time duration for: %s; %s\n", g.Format(dateOutputFmt), err)
+	}
+	b, err := goment.New(g.ToTime())
+	if err != nil {
+		log.Fatalf("Error #90995: unable to create time duration for: %s; %s\n", g.Format(dateOutputFmt), err)
+	}
+	a.Subtract(padTime)
+	b.Add(padTime)
+	return *a, *b
+}
+
+func IsNear(csv goment.Goment, reqDate []goment.Goment) (bool, int) {
+	for r, req := range reqDate {
+		a, b := GetPaddingRange(req)
+		fmt.Println("  a:", a.Format(dateOutputFmt))
+		fmt.Println("  b:", b.Format(dateOutputFmt))
+		fmt.Println("csv:", csv.Format(dateOutputFmt))
+		if csv.IsBetween(&a, &b) {
+			fmt.Printf("%s is near %s\n", csv.Format(dateOutputFmt), req.Format(dateOutputFmt))
+			return true, r
+		}
+	}
+	return false, -1
+}
+
+func findMissingDates(csvDate, reqDate []goment.Goment) []goment.Goment {
 	//debugLevel := allRootOptions.Debug
 	//fmt.Println()
 	//fmt.Println("=================================================================")
@@ -117,20 +170,62 @@ func findMissingDates(csvDate, requiredDates []goment.Goment) []goment.Goment {
 	//fmt.Println()
 
 	var seenDates []goment.Goment
-	//csvDate := csvDates
-	c := len(csvDate) - 1
-	r := 0
-	reqDate := requiredDates
 
-	for {
+	for _, csv := range csvDate {
+		found, r := IsNear(csv, reqDate)
+		if found {
+			seenDates = append(seenDates, reqDate[r])
+			reqDate = RemoveSliceItem(reqDate,r)
+		}
+	}
+
+	// c = 0
+/*	for {
+		for {
+			fmt.Println()
+			fmt.Println("========================================================")
+			fmt.Println("c, len(csvDate), r, len(reqDate)", c, len(csvDate), r, len(reqDate))
+			fmt.Printf("about to compare csv:%s\n", csvDate[c].Format(dateOutputFmt))
+			//fmt.Printf("                 req:%s\n", reqDate[r].Format(dateOutputFmt))
+			extendedTime := getExtendedTime(reqDate[r])
+			fmt.Printf("        extendedTime:%s\n", extendedTime.Format(dateOutputFmt))
+			show(reqDate, csvDate, seenDates, c, r)
+
+			if csvDate[c].IsSameOrBefore(extendedTime) {
+				fmt.Printf("added to seenDate: %s   c:%d\n", reqDate[r].Format(dateOutputFmt), c)
+				if FindInSlice(seenDates, reqDate[r]) == -1 {
+					seenDates = append(seenDates, reqDate[r])
+				} else {
+					fmt.Println("(but it was already added beforehand")
+				}
+				csvDate = BeheadSlice(csvDate, c)
+				c = -1
+			} else {
+				fmt.Println("removing head from reqDate and csvDate")
+				reqDate = BeheadSlice(reqDate,r)
+				csvDate = BeheadSlice(csvDate, c)
+				if len(csvDate) == 0{
+					fmt.Println("start debug")
+				}
+				c = -1
+			}
+			c += 1
+		} // for inner
+		r += 1
+		fmt.Println("22 c, len(csvDate), r, len(reqDate)", c, len(csvDate), r, len(reqDate))
+	}
+*/
+/*	for {
 		for {
 			fmt.Println()
 			fmt.Println("========================================================")
 			fmt.Println("c, len(csvDate), r, len(reqDate)", c, len(csvDate), r, len(reqDate))
 			fmt.Printf("about to compare csv:%s\n", csvDate[c].Format(dateOutputFmt))
 			fmt.Printf("                 req:%s\n", reqDate[r].Format(dateOutputFmt))
-			//show(reqDate, csvDate, seenDates, c, r)
-			if csvDate[c].IsSameOrBefore(&reqDate[r]) {
+			extendedTime := getExtendedTime(reqDate[r])
+			fmt.Printf("        extendedTime:%s\n", extendedTime.Format(dateOutputFmt))
+			show(reqDate, csvDate, seenDates, c, r)
+			if csvDate[c].IsSameOrBefore(extendedTime) {
 				fmt.Printf("added to seenDate: %s   c:%d", reqDate[r].Format(dateOutputFmt), c)
 				seenDates = append(seenDates, reqDate[r])
 				reqDate = RemoveSliceItem(reqDate, r)
@@ -154,7 +249,7 @@ func findMissingDates(csvDate, requiredDates []goment.Goment) []goment.Goment {
 			break
 		}
 		fmt.Println("22 c, len(csvDate), r, len(reqDate)", c, len(csvDate), r, len(reqDate))
-	}
+	}*/
 
 
 	fmt.Println()
@@ -227,7 +322,7 @@ func findMissingDates(csvDate, requiredDates []goment.Goment) []goment.Goment {
 	fmt.Println("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
 
 	 */
-	return reqDate
+	return seenDates
 }
 
 func findMissingDates2(csvDates, requiredDates []goment.Goment) []goment.Goment {
