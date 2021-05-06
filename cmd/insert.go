@@ -82,6 +82,9 @@ func insertOneFile(fname string) []string {
 
 	input, file := fileOps.CsvOpenRead(fname)
 	var r []rune
+	if allRootOptions.TabDelimiter {
+		allRootOptions.CsvDelimiter = "\\t"
+	}
 	if allRootOptions.CsvDelimiter == `\t` {
 		r = []rune{'\t'}
 	} else {
