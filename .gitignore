@@ -17,3 +17,5 @@ examples/
 playGround/
 b.ps1
 *.csv
+*.bak
+test/
