@@ -29,6 +29,7 @@ import (
 	"github.com/spf13/cobra"
 	"log"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -145,6 +146,30 @@ func GetPaddingRange(g goment.Goment) (goment.Goment, goment.Goment){
 	return *a, *b
 }
 
+func ExcludeDates(reqDate []goment.Goment) []goment.Goment {
+	if allRootOptions.SkipWeekends == false && len(allRootOptions.SkipDays) == 0 {
+		return reqDate
+	}
+
+	var allSkipDaysLower string
+	if len(allRootOptions.SkipDays) > 0 {
+		allSkipDaysLower = strings.ToLower(allRootOptions.SkipDays)
+	}
+
+	var included []goment.Goment
+	for _, req := range reqDate {
+		if allRootOptions.SkipWeekends && (req.Format("dddd") == "Saturday" || req.Format("dddd") == "Sunday") {
+			continue
+		}
+		skipDayLower := strings.ToLower(req.Format("dddd"))
+		if len(allRootOptions.SkipDays) > 0 && strings.Index(allSkipDaysLower,skipDayLower) >= 0 {
+			continue
+		}
+		included = append(included, req)
+	}
+	return included
+}
+
 func IsNear(csv goment.Goment, reqDate []goment.Goment) (bool, int) {
 	for r, req := range reqDate {
 		a, b := GetPaddingRange(req)
@@ -171,7 +196,10 @@ func findMissingDates(csvDate, reqDate []goment.Goment) []goment.Goment {
 	DisplayTable(csvDate,"csvDate", false, -1)
 	DisplayTable(reqDate,"reqDate", false, -1)*/
 
-	return reqDate
+	filterDate := ExcludeDates(reqDate)
+	//DisplayTable(filterDate,"filterDate", false, -1)
+
+	return filterDate
 }
 
 func getCsvDates(allRecords [][]string) ([]goment.Goment, map[string][]string) {
