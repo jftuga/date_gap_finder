@@ -24,10 +24,6 @@ package cmd
 import (
 	"fmt"
 	"github.com/spf13/cobra"
-	"os"
-
-	homedir "github.com/mitchellh/go-homedir"
-	"github.com/spf13/viper"
 )
 
 var cfgFile string
@@ -41,6 +37,7 @@ type rootOptions struct {
 	SkipWeekends bool
 	SkipDays string
 	CsvDelimiter string
+	TabDelimiter bool
 	Debug int
 }
 
@@ -63,41 +60,18 @@ func Execute() {
 }
 
 func init() {
-	cobra.OnInitialize(initConfig)
 	rootCmd.PersistentFlags().IntVarP(&allRootOptions.Column, "column", "c", 0, "CSV column number (starts at zero)")
 	rootCmd.PersistentFlags().BoolVarP(&allRootOptions.HasHeader, "header", "H", true, "if CSV file has header line")
 	rootCmd.PersistentFlags().IntVarP(&allRootOptions.Amount, "amount", "a", -1, "a maximum, numeric duration")
 	rootCmd.PersistentFlags().StringVarP(&allRootOptions.Unit, "unit", "u", "", "unit of time, such as: days, hours, minutes")
-	rootCmd.PersistentFlags().StringVarP(&allRootOptions.Padding, "padding","p", "0s", "add time to range before considering a gap between two dates")
+	rootCmd.PersistentFlags().StringVarP(&allRootOptions.Padding, "padding","p", "1s", "add time to range before considering a gap between two dates")
 	rootCmd.PersistentFlags().BoolVarP(&allRootOptions.SkipWeekends, "skipWeekends", "s", false, "allow gaps on weekends when set")
 	rootCmd.PersistentFlags().StringVarP(&allRootOptions.SkipDays, "skipDays", "S", "", "skip comma-delimited set of fully spelled out days")
 	rootCmd.PersistentFlags().IntVarP(&allRootOptions.Debug, "debug", "D", 0, "enable verbose debugging, set to 999 or 9999")
 	rootCmd.PersistentFlags().StringVarP(&allRootOptions.CsvDelimiter, "delimiter", "d", ",", "CSV delimiter")
+	rootCmd.PersistentFlags().BoolVarP(&allRootOptions.TabDelimiter, "tab", "t", false, "use tab character as CSV delimiter")
 
 	versionTemplate := fmt.Sprintf("%s v%s\n%s\n", pgmName, pgmVersion, pgmURL)
 	rootCmd.SetVersionTemplate(versionTemplate)
-
 }
 
-// initConfig reads in config file and ENV variables if set.
-func initConfig() {
-	if cfgFile != "" {
-		// Use config file from the flag.
-		viper.SetConfigFile(cfgFile)
-	} else {
-		// Find home directory.
-		home, err := homedir.Dir()
-		cobra.CheckErr(err)
-
-		// Search config in home directory with name ".date_gap_finder" (without extension).
-		viper.AddConfigPath(home)
-		viper.SetConfigName(".date_gap_finder")
-	}
-
-	viper.AutomaticEnv() // read in environment variables that match
-
-	// If a config file is found, read it in.
-	if err := viper.ReadInConfig(); err == nil {
-		fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
-	}
-}
