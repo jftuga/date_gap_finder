@@ -34,6 +34,7 @@ type insertOptions struct {
 	columnInserts []string
 	allColumnInserts string
 	Overwrite bool
+	MaxBackupFiles int
 }
 
 var allInsertOptions insertOptions
@@ -55,6 +56,7 @@ func init() {
 	insertCmd.Flags().StringArrayVarP(&allInsertOptions.columnInserts, "record", "r", []string{}, "insert record with missing data; format: col#,value")
 	insertCmd.Flags().StringVarP(&allInsertOptions.allColumnInserts, "allRecords", "R", "", "insert data to all columns of a missing row")
 	insertCmd.PersistentFlags().BoolVarP(&allInsertOptions.Overwrite, "overwrite", "O", false, "overwrite existing CSV file; original file saved as .bak")
+	insertCmd.Flags().IntVarP(&allInsertOptions.MaxBackupFiles, "max", "m", -1,"max number of backup files to save; -1=save all")
 }
 
 func insertAllFiles(args []string) {
@@ -64,7 +66,10 @@ func insertAllFiles(args []string) {
 			return
 		}
 		if allInsertOptions.Overwrite {
-			fileOps.OverwriteCsv(fname, augmentedData)
+			ok, _ := fileOps.OverwriteCsv(fname, augmentedData)
+			if ok && allInsertOptions.MaxBackupFiles > -1 {
+				fileOps.RemoveOldBackups(fname, allInsertOptions.MaxBackupFiles)
+			}
 			continue
 		}
 		for _, aug := range augmentedData {

@@ -162,7 +162,7 @@ __
 * If a `6 second` time padding is not used, then `8` rows will be returned.  This is most likely not an accurate result since the times are only off by a few seconds. By using `-p 6s` an accurate list of missing rows is returned.
 * Padding can end in `s` for seconds, `m` for minutes, or `h` for hours. `Days` are not supported.
 * Note that `24 hours` is used instead of `1 day`.
-* **It is better to use time padding (-p) vs. using a longer time amount (-a)**
+* **It is better to use time padding (-p) rather than using a longer time amount (-a)**
 ```
 $ date_gap_finder search -a 24 -u hours -p 6s f.csv
 2021-03-12 18:40:01
@@ -215,6 +215,16 @@ Processed	Date
 ```
 ___
 
+## Example 4
+
+When using the `insert` verb along with the `-O` switch (which is used for overwriting the CSV file), a backup file will be created in the form of:
+* `filename--YYYYMMDD.HHMMSS.bak`
+
+This backup file will be identical to the original CSV file. The number of backup files will **continuously grow** unless the `-m` switch is used.  For example, using `-m 3` will limit the number of `.bak` files to `3`.
+```
+$ date_gap_finder insert -a 1440 -u minutes -t -c 1 -r 0,9999 -m 3 g.csv
+```
+___
 
 ## License
 * [MIT License](LICENSE)

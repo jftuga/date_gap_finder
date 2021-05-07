@@ -7,10 +7,14 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/csv"
+	"fmt"
 	"github.com/jftuga/date_gap_finder/filecopy"
+	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
+	"regexp"
+	"sort"
 	"strings"
 	"time"
 )
@@ -42,6 +46,44 @@ func SaveToCsv(fname string, data [][]string) {
 	fname = "new--" + fname
 	w := csv.NewWriter(os.Stdout)
 	w.WriteAll(data)
+}
+
+func RemoveOldBackups(rawName string, max int) {
+	if max == -1 {
+		return
+	}
+	dname := filepath.Dir(rawName)
+	fname := filepath.Base(rawName)
+	files, err := ioutil.ReadDir(dname)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	baseName, _ :=  SplitFilename(fname)
+	ymd := "([12]\\d{3}(0[1-9]|1[0-2])(0[1-9]|[12]\\d|3[01]))"
+	hms := "([0-1]?[0-9]|2[0-3])[0-5][0-9][0-5][0-9]"
+	expr := fmt.Sprintf("%s--%s\\.%s\\.bak", baseName, ymd, hms)
+	backupMatch := regexp.MustCompile(expr)
+
+	var allBackupFiles []string
+	for _, f := range files {
+		if backupMatch.MatchString(f.Name()) {
+			fullPath := filepath.Join(dname, f.Name())
+			allBackupFiles = append(allBackupFiles, fullPath)
+		}
+	}
+	if max > 0 && len(allBackupFiles) <= max {
+		return
+	}
+
+	sort.Strings(allBackupFiles)
+	stop := len(allBackupFiles) - max
+	for _, bkup := range allBackupFiles[:stop] {
+		err = os.Remove(bkup)
+		if err != nil {
+			log.Printf("Warning: could not delete backup file: %s; %s\n", bkup, err)
+		}
+	}
 }
 
 // OverwriteCsv a CSV file with new data; also create a backup file with date and .bak extension
