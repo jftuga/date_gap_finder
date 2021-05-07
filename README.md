@@ -47,6 +47,7 @@ Use "date_gap_finder [command] --help" for more information about a command.
 
 Flags for "insert":
   -R, --allRecords string    insert data to all columns of a missing row
+  -m, --max int              max number of backup files to save; -1=save all (default -1)
   -O, --overwrite            overwrite existing CSV file; original file saved as .bak
   -r, --record stringArray   insert record with missing data; format: col#,value
 
