@@ -38,6 +38,7 @@ type rootOptions struct {
 	SkipDays string
 	CsvDelimiter string
 	TabDelimiter bool
+	DateTimeFormat string
 	Debug int
 }
 
@@ -69,6 +70,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&allRootOptions.SkipDays, "skipDays", "S", "", "skip comma-delimited set of fully spelled out days")
 	rootCmd.PersistentFlags().IntVarP(&allRootOptions.Debug, "debug", "D", 0, "enable verbose debugging, set to 999 or 9999")
 	rootCmd.PersistentFlags().StringVarP(&allRootOptions.CsvDelimiter, "delimiter", "d", ",", "CSV delimiter")
+	rootCmd.PersistentFlags().StringVarP(&allRootOptions.DateTimeFormat, "format", "f", "", "use this date/time format; See https://github.com/nleeper/goment#format")
 	rootCmd.PersistentFlags().BoolVarP(&allRootOptions.TabDelimiter, "tab", "t", false, "use tab character as CSV delimiter")
 
 	versionTemplate := fmt.Sprintf("%s v%s\n%s\n", pgmName, pgmVersion, pgmURL)

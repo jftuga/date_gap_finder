@@ -206,13 +206,22 @@ func getCsvDates(allRecords [][]string) ([]goment.Goment, map[string][]string) {
 	// build csvDates
 	var csvDates []goment.Goment
 	allRows := make(map [string][]string)
+	var g *goment.Goment
+	var err error
 	for i, d := range allRecords {
 		if !allRootOptions.HasNoHeader && i == 0 {
 			continue
 		}
-		g, err := goment.New(d[allRootOptions.Column])
-		if err != nil {
-			log.Fatalf("Error #30425: Invalid data/time: '%s'; %s\n", d[allRootOptions.Column], err)
+		if len(allRootOptions.DateTimeFormat) == 0 {
+			g, err = goment.New(d[allRootOptions.Column])
+			if err != nil {
+				log.Fatalf("Error #30425: Invalid data/time: '%s'; %s; Try using the -f option.\n", d[allRootOptions.Column], err)
+			}
+		} else {
+			g, err = goment.New(d[allRootOptions.Column], allRootOptions.DateTimeFormat)
+			if err != nil {
+				log.Fatalf("Error #30428: Invalid data/time: '%s' with format: '%s'; %s\n", d[allRootOptions.Column], allRootOptions.DateTimeFormat, err)
+			}
 		}
 		csvDates = append(csvDates,*g)
 		allRows[g.Format(dateOutputFmt)] = d
@@ -242,16 +251,31 @@ func getCsvAndRequiredDates(input *csv.Reader, streamName string) ([]goment.Gome
 		log.Fatalf("Error #98450: CSV file only contains '%d' records: '%s'\n", len(allRecords), streamName)
 	}
 	firstRec := allRecords[f]
-	first, err := goment.New(firstRec[allRootOptions.Column])
-	if err != nil {
-		log.Fatalf("Error #30430: Invalid data/time: '%s'; %s\n", firstRec[allRootOptions.Column], err)
+	var first *goment.Goment
+	if len(allRootOptions.DateTimeFormat) == 0 {
+		first, err = goment.New(firstRec[allRootOptions.Column])
+		if err != nil {
+			log.Fatalf("Error #30430: Invalid data/time: '%s'; %s; Try using the -f option.\n", firstRec[allRootOptions.Column], err)
+		}
+	}  else {
+		first, err = goment.New(firstRec[allRootOptions.Column], allRootOptions.DateTimeFormat)
+		if err != nil {
+			log.Fatalf("Error #30432: Invalid data/time: '%s' with format: '%s'; %s\n", firstRec[allRootOptions.Column], allRootOptions.DateTimeFormat, err)
+		}
 	}
 	lastRec := allRecords[len(allRecords)-1]
-	last, err := goment.New(lastRec[allRootOptions.Column])
-	if err != nil {
-		log.Fatalf("Error #30435: Invalid data/time: '%s'; %s\n", lastRec[allRootOptions.Column], err)
+	var last *goment.Goment
+	if len(allRootOptions.DateTimeFormat) == 0 {
+		last, err = goment.New(lastRec[allRootOptions.Column])
+		if err != nil {
+			log.Fatalf("Error #30435: Invalid data/time: '%s'; %s\n", lastRec[allRootOptions.Column], err)
+		}
+	} else {
+		last, err = goment.New(lastRec[allRootOptions.Column], allRootOptions.DateTimeFormat)
+		if err != nil {
+			log.Fatalf("Error #30437: Invalid data/time: '%s' with format: '%s'; %s\n", lastRec[allRootOptions.Column], allRootOptions.DateTimeFormat, err)
+		}
 	}
-
 	layout := firstRec[allRootOptions.Column]
 	csvStyleDate := ConvertDate(first.ToTime(), layout)
 

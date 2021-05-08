@@ -33,6 +33,7 @@ Flags:
   -c, --column int         CSV column number (starts at zero)
   -D, --debug int          enable verbose debugging, set to 999 or 9999
   -d, --delimiter string   CSV delimiter (default ",")
+  -f, --format string      use this date/time format; See https://github.com/nleeper/goment#format
   -h, --help               help for date_gap_finder
   -n, --noheader           set if CSV file does not have header line
   -p, --padding string     add time to range before considering a gap between two dates (default "1s")
@@ -50,7 +51,6 @@ Flags for "insert":
   -m, --max int              max number of backup files to save; -1=save all (default -1)
   -O, --overwrite            overwrite existing CSV file; original file saved as .bak
   -r, --record stringArray   insert record with missing data; format: col#,value
-
 ```
 
 ___
