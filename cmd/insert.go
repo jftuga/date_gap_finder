@@ -24,6 +24,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/jftuga/date_gap_finder/fileOps"
+	"github.com/nleeper/goment"
 	"github.com/spf13/cobra"
 	"log"
 	"sort"
@@ -140,7 +141,11 @@ func insertOneFile(fname string) []string {
 	}
 
 	sortedRecords := allRecords
-	sortRecords(sortedRecords)
+	if len(allRootOptions.DateTimeFormat) == 0 {
+		sortRecords(sortedRecords)
+	} else {
+		sortRecordsWithFormat(sortedRecords)
+	}
 	if debug > 9998 {
 		fmt.Println()
 		fmt.Println("sortedRecords")
@@ -190,6 +195,23 @@ func sortRecords(entry [][]string) {
 		return entry[i][allRootOptions.Column] < entry[j][allRootOptions.Column]
 	})
 }
+
+func sortRecordsWithFormat(entry [][]string) {
+	var err error
+	var a, b *goment.Goment
+	sort.SliceStable(entry, func(i, j int) bool {
+		a, err = goment.New(entry[i][allRootOptions.Column], allRootOptions.DateTimeFormat)
+		if err != nil {
+			log.Fatalf("Error #09540: %s; %s\n", entry[i][allRootOptions.Column], err)
+		}
+		b, err = goment.New(entry[j][allRootOptions.Column], allRootOptions.DateTimeFormat)
+		if err != nil {
+			log.Fatalf("Error #09545: %s; %s\n", entry[j][allRootOptions.Column], err)
+		}
+		return a.IsBefore(b)
+	})
+}
+
 
 func createNewRow(missedDate string, numOfColumns int) []string {
 	debug := allRootOptions.Debug
