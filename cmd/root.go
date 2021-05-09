@@ -39,6 +39,8 @@ type rootOptions struct {
 	CsvDelimiter string
 	TabDelimiter bool
 	DateTimeFormat string
+	DateBegin string
+	DateEnd string
 	Debug int
 }
 
@@ -72,6 +74,8 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&allRootOptions.CsvDelimiter, "delimiter", "d", ",", "CSV delimiter")
 	rootCmd.PersistentFlags().StringVarP(&allRootOptions.DateTimeFormat, "format", "f", "", "use this date/time format; See https://github.com/nleeper/goment#format")
 	rootCmd.PersistentFlags().BoolVarP(&allRootOptions.TabDelimiter, "tab", "t", false, "use tab character as CSV delimiter")
+	//rootCmd.PersistentFlags().StringVarP(&allRootOptions.DateBegin, "begin", "B", "", "only consider dates on or after this date")
+	//rootCmd.PersistentFlags().StringVarP(&allRootOptions.DateEnd, "end", "E", "", "only consider dates on or before this date")
 
 	versionTemplate := fmt.Sprintf("%s v%s\n%s\n", pgmName, pgmVersion, pgmURL)
 	rootCmd.SetVersionTemplate(versionTemplate)
