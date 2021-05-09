@@ -215,12 +215,12 @@ func getCsvDates(allRecords [][]string) ([]goment.Goment, map[string][]string) {
 		if len(allRootOptions.DateTimeFormat) == 0 {
 			g, err = goment.New(d[allRootOptions.Column])
 			if err != nil {
-				log.Fatalf("Error #30425: Invalid data/time: '%s'; %s; Try using the -f option.\n", d[allRootOptions.Column], err)
+				log.Fatalf("Error #30425: Invalid date/time: '%s'; %s; Try using the -f option.\n", d[allRootOptions.Column], err)
 			}
 		} else {
 			g, err = goment.New(d[allRootOptions.Column], allRootOptions.DateTimeFormat)
 			if err != nil {
-				log.Fatalf("Error #30428: Invalid data/time: '%s' with format: '%s'; %s\n", d[allRootOptions.Column], allRootOptions.DateTimeFormat, err)
+				log.Fatalf("Error #30428: Invalid date/time: '%s' with format: '%s'; %s\n", d[allRootOptions.Column], allRootOptions.DateTimeFormat, err)
 			}
 		}
 		csvDates = append(csvDates,*g)
@@ -255,12 +255,12 @@ func getCsvAndRequiredDates(input *csv.Reader, streamName string) ([]goment.Gome
 	if len(allRootOptions.DateTimeFormat) == 0 {
 		first, err = goment.New(firstRec[allRootOptions.Column])
 		if err != nil {
-			log.Fatalf("Error #30430: Invalid data/time: '%s'; %s; Try using the -f option.\n", firstRec[allRootOptions.Column], err)
+			log.Fatalf("Error #30430: Invalid date/time: '%s'; %s; Try using the -f option.\n", firstRec[allRootOptions.Column], err)
 		}
 	}  else {
 		first, err = goment.New(firstRec[allRootOptions.Column], allRootOptions.DateTimeFormat)
 		if err != nil {
-			log.Fatalf("Error #30432: Invalid data/time: '%s' with format: '%s'; %s\n", firstRec[allRootOptions.Column], allRootOptions.DateTimeFormat, err)
+			log.Fatalf("Error #30432: Invalid date/time: '%s' with format: '%s'; %s\n", firstRec[allRootOptions.Column], allRootOptions.DateTimeFormat, err)
 		}
 	}
 	lastRec := allRecords[len(allRecords)-1]
@@ -268,12 +268,12 @@ func getCsvAndRequiredDates(input *csv.Reader, streamName string) ([]goment.Gome
 	if len(allRootOptions.DateTimeFormat) == 0 {
 		last, err = goment.New(lastRec[allRootOptions.Column])
 		if err != nil {
-			log.Fatalf("Error #30435: Invalid data/time: '%s'; %s\n", lastRec[allRootOptions.Column], err)
+			log.Fatalf("Error #30435: Invalid date/time: '%s'; %s\n", lastRec[allRootOptions.Column], err)
 		}
 	} else {
 		last, err = goment.New(lastRec[allRootOptions.Column], allRootOptions.DateTimeFormat)
 		if err != nil {
-			log.Fatalf("Error #30437: Invalid data/time: '%s' with format: '%s'; %s\n", lastRec[allRootOptions.Column], allRootOptions.DateTimeFormat, err)
+			log.Fatalf("Error #30437: Invalid date/time: '%s' with format: '%s'; %s\n", lastRec[allRootOptions.Column], allRootOptions.DateTimeFormat, err)
 		}
 	}
 	layout := firstRec[allRootOptions.Column]
