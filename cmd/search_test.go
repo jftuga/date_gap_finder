@@ -183,6 +183,7 @@ func TestSearch7(t *testing.T) {
 
 	allRootOptions.Amount = 1
 	allRootOptions.Unit = "days"
+	allRootOptions.Padding = "5m"
 	allRootOptions.Column = 0
 	allRootOptions.CsvDelimiter = ","
 	allRootOptions.SkipWeekends = true
@@ -191,5 +192,26 @@ func TestSearch7(t *testing.T) {
 	missingDates, csvStyleDate := SearchOneFile(fname)
 	iss := is.New(t)
 	iss.Equal(len(missingDates), 0)
+	iss.Equal(csvStyleDate,"2021-04-15 06:55:01")
+}
+
+// TestSearch8 - no date gaps, but use -E to change the end date
+func TestSearch8(t *testing.T) {
+	fname := "TestSearch8.csv"
+	data := "2021-04-15 06:55:01,0,23\n2021-04-15 08:30:26,0,23\n2021-04-16 06:55:01,0,23\n2021-04-19 06:55:01,0,23\n"
+	CreateCSVFile(fname, data)
+
+	allRootOptions.Amount = 1
+	allRootOptions.Unit = "days"
+	allRootOptions.Column = 0
+	allRootOptions.CsvDelimiter = ","
+	allRootOptions.SkipWeekends = true
+	allRootOptions.HasNoHeader = true
+	allRootOptions.DateEnd = "2021-04-21"
+
+	missingDates, csvStyleDate := SearchOneFile(fname)
+	iss := is.New(t)
+	iss.Equal(len(missingDates), 1)
+	iss.Equal(missingDates[0].ToTime().String(),"2021-04-20 06:55:01 +0000 UTC")
 	iss.Equal(csvStyleDate,"2021-04-15 06:55:01")
 }

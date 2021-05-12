@@ -250,32 +250,43 @@ func getCsvAndRequiredDates(input *csv.Reader, streamName string) ([]goment.Gome
 	if f >= len(allRecords) {
 		log.Fatalf("Error #98450: CSV file only contains '%d' records: '%s'\n", len(allRecords), streamName)
 	}
+
 	firstRec := allRecords[f]
 	var first *goment.Goment
+	firstObj := firstRec[allRootOptions.Column]
+	if len(allRootOptions.DateBegin) > 0 {
+		firstObj = allRootOptions.DateBegin
+	}
 	if len(allRootOptions.DateTimeFormat) == 0 {
-		first, err = goment.New(firstRec[allRootOptions.Column])
+		first, err = goment.New(firstObj)
 		if err != nil {
-			log.Fatalf("Error #30430: Invalid date/time: '%s'; %s; Try using the -f option.\n", firstRec[allRootOptions.Column], err)
+			log.Fatalf("Error #30430: Invalid date/time: '%s'; %s; Try using the -f option.\n", firstObj, err)
 		}
 	}  else {
-		first, err = goment.New(firstRec[allRootOptions.Column], allRootOptions.DateTimeFormat)
+		first, err = goment.New(firstObj, allRootOptions.DateTimeFormat)
 		if err != nil {
-			log.Fatalf("Error #30432: Invalid date/time: '%s' with format: '%s'; %s\n", firstRec[allRootOptions.Column], allRootOptions.DateTimeFormat, err)
+			log.Fatalf("Error #30432: Invalid date/time: '%s' with format: '%s'; %s\n", firstObj, allRootOptions.DateTimeFormat, err)
 		}
 	}
+
 	lastRec := allRecords[len(allRecords)-1]
 	var last *goment.Goment
+	lastObj := lastRec[allRootOptions.Column]
+	if len(allRootOptions.DateEnd) > 0 {
+		lastObj = allRootOptions.DateEnd
+	}
 	if len(allRootOptions.DateTimeFormat) == 0 {
-		last, err = goment.New(lastRec[allRootOptions.Column])
+		last, err = goment.New(lastObj)
 		if err != nil {
-			log.Fatalf("Error #30435: Invalid date/time: '%s'; %s\n", lastRec[allRootOptions.Column], err)
+			log.Fatalf("Error #30435: Invalid date/time: '%s'; %s; Try using the -f option.\n", lastObj, err)
 		}
 	} else {
-		last, err = goment.New(lastRec[allRootOptions.Column], allRootOptions.DateTimeFormat)
+		last, err = goment.New(lastObj, allRootOptions.DateTimeFormat)
 		if err != nil {
-			log.Fatalf("Error #30437: Invalid date/time: '%s' with format: '%s'; %s\n", lastRec[allRootOptions.Column], allRootOptions.DateTimeFormat, err)
+			log.Fatalf("Error #30437: Invalid date/time: '%s' with format: '%s'; %s\n", lastObj, allRootOptions.DateTimeFormat, err)
 		}
 	}
+
 	layout := firstRec[allRootOptions.Column]
 	csvStyleDate := ConvertDate(first.ToTime(), layout)
 
