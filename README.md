@@ -27,12 +27,15 @@ Available Commands:
   help        Help about any command
   insert      insert missing CSV entries
   search      search CSV files for missing dates
+  stats       Show CSV file statistics
 
 Flags:
   -a, --amount int         a maximum, numeric duration (default -1)
+  -B, --begin string       only consider dates on or after this date
   -c, --column int         CSV column number (starts at zero)
   -D, --debug int          enable verbose debugging, set to 999 or 9999
   -d, --delimiter string   CSV delimiter (default ",")
+  -E, --end string         only consider dates on or before this date
   -f, --format string      use this date/time format; See https://github.com/nleeper/goment#format
   -h, --help               help for date_gap_finder
   -n, --noheader           set if CSV file does not have header line
@@ -42,15 +45,6 @@ Flags:
   -t, --tab                use tab character as CSV delimiter
   -u, --unit string        unit of time, such as: days, hours, minutes
   -v, --version            version for date_gap_finder
-
-Use "date_gap_finder [command] --help" for more information about a command.
-
-
-Flags for "insert":
-  -R, --allRecords string    insert data to all columns of a missing row
-  -m, --max int              max number of backup files to save; -1=save all (default -1)
-  -O, --overwrite            overwrite existing CSV file; original file saved as .bak
-  -r, --record stringArray   insert record with missing data; format: col#,value
 ```
 
 ___
@@ -227,6 +221,24 @@ $ date_gap_finder insert -a 1440 -u minutes -t -c 1 -r 0,9999 -m 3 g.csv
 ```
 ___
 
+## Example 5
+`weekly.csv` is a CSV file with new entries occurring about once per week. The `mode` is the duration that occurs most often in a CSV file.
+```
+PS C:> .\date_gap_finder.exe stats weekly.csv
++------------------------------+-----------------------+
+| file                         | weekly.csv            |
+| records                      | 57                    |
+| columns                      | 6                     |
+| date/time layout             | 06-Mar-2020           |
+| average time between entries | 1 week 6 hours        |
+| total duration               | 1 year 5 weeks 6 days |
+| mode                         | 1 week (168h0m0s)     |
+| mode count                   | 54                    |
++------------------------------+-----------------------+
+```
+
+
+___
 ## License
 * [MIT License](LICENSE)
 
