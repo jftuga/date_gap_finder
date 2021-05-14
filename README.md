@@ -178,7 +178,6 @@ This example file is called `g.csv`.  The `date` column is in `1` instead of the
 | 5197 | 2021-04-13
 | 5206 | 2021-04-14
 | 5222 | 2021-04-19
-__
 
 ## search for gaps when date is not the first column and use a different column delimiter
 * Use `-d "\t"` to define the column delimiter
