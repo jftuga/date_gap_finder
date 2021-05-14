@@ -13,6 +13,14 @@ func waitForInput() {
 	fmt.Scanln(&pause)
 }
 
+func DisplayStats(statsData [][]string) {
+	table := tablewriter.NewWriter(os.Stdout)
+	table.SetAlignment(tablewriter.ALIGN_LEFT)
+	table.SetAutoWrapText(false)
+	table.AppendBulk(statsData)
+	table.Render()
+}
+
 func DisplayTable(g []goment.Goment, desc string, pause bool, highlight int) {
 	if len(g) == 0 {
 		if pause {
