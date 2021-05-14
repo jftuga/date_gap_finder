@@ -4,6 +4,7 @@ go 1.16
 
 require (
 	github.com/araddon/dateparse v0.0.0-20210207001429-0eec95c9db7e
+	github.com/hako/durafmt v0.0.0-20210316092057-3a2c319c1acd
 	github.com/matryer/is v1.4.0
 	github.com/nleeper/goment v1.4.1
 	github.com/olekukonko/tablewriter v0.0.5
